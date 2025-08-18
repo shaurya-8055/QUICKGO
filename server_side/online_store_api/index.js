@@ -10,6 +10,7 @@ const app = express();
 // CORS: reflect origin and allow PATCH/OPTIONS with common headers
 const corsOptions = {
     origin: true,
+    
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
     credentials: false,
 };

@@ -28,10 +28,15 @@ class UserProvider extends ChangeNotifier {
         if (success) {
           final user =
               User.fromJson(body['data']['user'] as Map<String, dynamic>);
-          final token = body['data']['token'] as String?;
+          final accessToken = body['data']['accessToken'] ?? body['data']['token'];
+          final refreshToken = body['data']['refreshToken'];
+          
           await saveLoginInfo(user);
-          if (token != null) {
-            await box.write(AUTH_TOKEN_BOX, token);
+          if (accessToken != null) {
+            await box.write(AUTH_TOKEN_BOX, accessToken);
+          }
+          if (refreshToken != null) {
+            await box.write('refresh_token', refreshToken);
           }
           SnackBarHelper.showSuccessSnackBar(
               body['message'] ?? 'Login success');
@@ -127,10 +132,15 @@ class UserProvider extends ChangeNotifier {
       if (res.isOk && (res.body['success'] == true)) {
         final user =
             User.fromJson(res.body['data']['user'] as Map<String, dynamic>);
-        final token = res.body['data']['token'] as String?;
+        final accessToken = res.body['data']['accessToken'] ?? res.body['data']['token'];
+        final refreshToken = res.body['data']['refreshToken'];
+        
         await saveLoginInfo(user);
-        if (token != null) {
-          await box.write(AUTH_TOKEN_BOX, token);
+        if (accessToken != null) {
+          await box.write(AUTH_TOKEN_BOX, accessToken);
+        }
+        if (refreshToken != null) {
+          await box.write('refresh_token', refreshToken);
         }
         await box.remove(PENDING_OTP_PHONE);
         SnackBarHelper.showSuccessSnackBar('Welcome back');
@@ -155,10 +165,46 @@ class UserProvider extends ChangeNotifier {
   }
 
   //? to logout the user
-  logOutUser() {
+  logOutUser() async {
+    try {
+      // Call logout API to invalidate tokens on server
+      await service.addItem(endpointUrl: 'auth/logout', itemData: {});
+    } catch (e) {
+      // Continue with local logout even if API call fails
+      print('Logout API call failed: $e');
+    }
+    
     box.remove(USER_INFO_BOX);
     box.remove(AUTH_TOKEN_BOX);
+    box.remove('refresh_token');
     box.remove(PENDING_OTP_PHONE);
     Get.offAll(const LoginScreen());
+  }
+
+  // Token refresh method
+  Future<bool> refreshAccessToken() async {
+    try {
+      final refreshToken = box.read('refresh_token') as String?;
+      if (refreshToken == null) return false;
+
+      final response = await service.addItem(
+        endpointUrl: 'auth/refresh-token',
+        itemData: {'refreshToken': refreshToken},
+      );
+
+      if (response.isOk && response.body['success'] == true) {
+        final newAccessToken = response.body['data']['accessToken'];
+        final newRefreshToken = response.body['data']['refreshToken'];
+        
+        await box.write(AUTH_TOKEN_BOX, newAccessToken);
+        await box.write('refresh_token', newRefreshToken);
+        return true;
+      }
+      
+      return false;
+    } catch (e) {
+      print('Token refresh failed: $e');
+      return false;
+    }
   }
 }
