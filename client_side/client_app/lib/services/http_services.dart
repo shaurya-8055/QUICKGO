@@ -18,10 +18,9 @@ class HttpService {
     Future<Response> Function() request,
   ) async {
     var response = await request();
-    
+
     // If token expired, try to refresh
-    if (response.statusCode == 401 && 
-        response.body?['expired'] == true) {
+    if (response.statusCode == 401 && response.body?['expired'] == true) {
       final refreshed = await _refreshToken();
       if (refreshed) {
         // Retry the request with new token
@@ -31,7 +30,7 @@ class HttpService {
         _handleAuthFailure();
       }
     }
-    
+
     return response;
   }
 
@@ -48,12 +47,12 @@ class HttpService {
       if (response.isOk && response.body['success'] == true) {
         final newAccessToken = response.body['data']['accessToken'];
         final newRefreshToken = response.body['data']['refreshToken'];
-        
+
         await _box.write(AUTH_TOKEN_BOX, newAccessToken);
         await _box.write('refresh_token', newRefreshToken);
         return true;
       }
-      
+
       return false;
     } catch (e) {
       print('Token refresh failed: $e');

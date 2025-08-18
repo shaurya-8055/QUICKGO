@@ -8,13 +8,13 @@ const String MAIN_URL = _PRODUCTION_URL;
 String getMainUrl() {
   // Always use production URL for deployed app
   return _PRODUCTION_URL;
-  
+
   // For local development, uncomment these imports and modify return logic:
   // import 'dart:io' show Platform;
   // import 'package:flutter/foundation.dart' show kIsWeb;
   // const String _LOCALHOST_URL = 'http://localhost:3000';
   // const String _ANDROID_EMULATOR_URL = 'http://10.0.2.2:3000';
-  
+
   // if (kIsWeb) return _LOCALHOST_URL;
   // try {
   //   if (Platform.isAndroid) return _ANDROID_EMULATOR_URL;

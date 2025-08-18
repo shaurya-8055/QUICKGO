@@ -45,7 +45,8 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
         final body = response.body;
         if (body['success'] == true) {
           final user = body['data']['user'];
-          final accessToken = body['data']['accessToken'] ?? body['data']['token'];
+          final accessToken =
+              body['data']['accessToken'] ?? body['data']['token'];
           final refreshToken = body['data']['refreshToken'];
 
           // Check if user is admin
@@ -63,7 +64,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
           await prefs.setString('admin_user', user.toString());
 
           SnackBarHelper.showSuccessSnackBar('Welcome Admin!');
-          
+
           if (mounted) {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (_) => MainScreen()),
@@ -135,7 +136,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
-                
+
                 // Username field
                 TextFormField(
                   controller: _usernameController,
@@ -153,7 +154,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Password field
                 TextFormField(
                   controller: _passwordController,
@@ -182,7 +183,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                   },
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Login button
                 ElevatedButton(
                   onPressed: _isLoading ? null : _login,
@@ -200,7 +201,8 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                           width: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
                       : const Text(
@@ -211,9 +213,9 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                           ),
                         ),
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Footer
                 const Text(
                   'QuickGo Admin Panel',

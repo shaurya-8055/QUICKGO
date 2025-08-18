@@ -28,9 +28,10 @@ class UserProvider extends ChangeNotifier {
         if (success) {
           final user =
               User.fromJson(body['data']['user'] as Map<String, dynamic>);
-          final accessToken = body['data']['accessToken'] ?? body['data']['token'];
+          final accessToken =
+              body['data']['accessToken'] ?? body['data']['token'];
           final refreshToken = body['data']['refreshToken'];
-          
+
           await saveLoginInfo(user);
           if (accessToken != null) {
             await box.write(AUTH_TOKEN_BOX, accessToken);
@@ -132,9 +133,10 @@ class UserProvider extends ChangeNotifier {
       if (res.isOk && (res.body['success'] == true)) {
         final user =
             User.fromJson(res.body['data']['user'] as Map<String, dynamic>);
-        final accessToken = res.body['data']['accessToken'] ?? res.body['data']['token'];
+        final accessToken =
+            res.body['data']['accessToken'] ?? res.body['data']['token'];
         final refreshToken = res.body['data']['refreshToken'];
-        
+
         await saveLoginInfo(user);
         if (accessToken != null) {
           await box.write(AUTH_TOKEN_BOX, accessToken);
@@ -173,7 +175,7 @@ class UserProvider extends ChangeNotifier {
       // Continue with local logout even if API call fails
       print('Logout API call failed: $e');
     }
-    
+
     box.remove(USER_INFO_BOX);
     box.remove(AUTH_TOKEN_BOX);
     box.remove('refresh_token');
@@ -195,12 +197,12 @@ class UserProvider extends ChangeNotifier {
       if (response.isOk && response.body['success'] == true) {
         final newAccessToken = response.body['data']['accessToken'];
         final newRefreshToken = response.body['data']['refreshToken'];
-        
+
         await box.write(AUTH_TOKEN_BOX, newAccessToken);
         await box.write('refresh_token', newRefreshToken);
         return true;
       }
-      
+
       return false;
     } catch (e) {
       print('Token refresh failed: $e');
