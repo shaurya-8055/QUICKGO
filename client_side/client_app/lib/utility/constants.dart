@@ -1,24 +1,27 @@
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
-
-// Default URLs for local development. Android emulators cannot reach the host
-// machine via `localhost`, they need `10.0.2.2`.
-const String _LOCALHOST_URL = 'http://localhost:3000';
-const String _ANDROID_EMULATOR_URL = 'http://10.0.2.2:3000';
+// Production URL pointing to your deployed Render server
+const String _PRODUCTION_URL = 'https://quickgo-tpum.onrender.com';
 
 // Backwards-compat constant (some old code may read this), but prefer getMainUrl().
-const String MAIN_URL = _LOCALHOST_URL;
+const String MAIN_URL = _PRODUCTION_URL;
 
 // Determine the correct base URL for the current platform.
 String getMainUrl() {
-  if (kIsWeb) return _LOCALHOST_URL; // adjust if hosting elsewhere
-  try {
-    if (Platform.isAndroid) return _ANDROID_EMULATOR_URL;
-    // iOS Simulator and desktop can use localhost
-    return _LOCALHOST_URL;
-  } catch (_) {
-    return _LOCALHOST_URL;
-  }
+  // Always use production URL for deployed app
+  return _PRODUCTION_URL;
+  
+  // For local development, uncomment these imports and modify return logic:
+  // import 'dart:io' show Platform;
+  // import 'package:flutter/foundation.dart' show kIsWeb;
+  // const String _LOCALHOST_URL = 'http://localhost:3000';
+  // const String _ANDROID_EMULATOR_URL = 'http://10.0.2.2:3000';
+  
+  // if (kIsWeb) return _LOCALHOST_URL;
+  // try {
+  //   if (Platform.isAndroid) return _ANDROID_EMULATOR_URL;
+  //   return _LOCALHOST_URL;
+  // } catch (_) {
+  //   return _LOCALHOST_URL;
+  // }
 }
 
 const FAVORITE_PRODUCT_BOX = 'FAVORITE_PRODUCT_BOX';
