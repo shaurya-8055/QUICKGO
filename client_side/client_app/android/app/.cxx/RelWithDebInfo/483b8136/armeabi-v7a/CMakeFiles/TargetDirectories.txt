@@ -1,2 +1,0 @@
-C:/Users/Asus/Desktop/complete_ecom_app_random_87129001_a1234_codeing_123/client_side/client_app/android/app/.cxx/RelWithDebInfo/483b8136/armeabi-v7a/CMakeFiles/edit_cache.dir
-C:/Users/Asus/Desktop/complete_ecom_app_random_87129001_a1234_codeing_123/client_side/client_app/android/app/.cxx/RelWithDebInfo/483b8136/armeabi-v7a/CMakeFiles/rebuild_cache.dir

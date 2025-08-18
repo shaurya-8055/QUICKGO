@@ -21,6 +21,7 @@ yarn-error.log*
 .flutter-plugins-dependencies
 .melos_tool/
 .flutter-configuration
+**/.cxx/
 
 # Logs
 logs/
