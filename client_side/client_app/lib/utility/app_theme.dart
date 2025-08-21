@@ -162,16 +162,15 @@ class AppTheme {
         ),
 
         // Card Theme
-      cardTheme: CardThemeData(
-  surfaceTintColor: AppColors.surface,
-  shadowColor: AppColors.shadow,
-  elevation: 2,
-  shape: RoundedRectangleBorder(
-    borderRadius: AppRadius.mdRadius,
-  ),
-  margin: const EdgeInsets.all(8),
-),
-
+        cardTheme: CardThemeData(
+          surfaceTintColor: AppColors.surface,
+          shadowColor: AppColors.shadow,
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: AppRadius.mdRadius,
+          ),
+          margin: const EdgeInsets.all(8),
+        ),
 
         // Input Decoration Theme
         inputDecorationTheme: InputDecorationTheme(
@@ -358,7 +357,7 @@ class AppTheme {
         ),
 
         // Card Theme
-        cardTheme: CardTheme(
+        cardTheme: CardThemeData(
           color: const Color(0xFF1A1D29),
           shadowColor: Colors.black.withOpacity(0.3),
           elevation: 2,
