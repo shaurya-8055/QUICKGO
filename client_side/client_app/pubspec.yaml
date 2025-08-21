@@ -13,7 +13,7 @@ dependencies:
 
   get: ^4.6.6 #for page routing and show snack-bar
   bottom_navy_bar: ^6.1.0 #for show beautiful bottom animation navigation  bar
-  smooth_page_indicator: ^1.2.0+3 #for animate the CarouselSlider product image slider
+  smooth_page_indicator: ^1.2.1 #for animate the CarouselSlider product image slider
   flutter_rating_bar: ^4.0.1 #for show start rating
   font_awesome_flutter: ^10.8.0 #for use icons
   animations: ^2.0.11 #for animation

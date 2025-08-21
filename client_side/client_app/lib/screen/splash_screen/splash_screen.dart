@@ -25,7 +25,8 @@ class _SplashScreenState extends State<SplashScreen> {
       Future.delayed(const Duration(milliseconds: 400)), // minimal splash delay
     ]);
     final user = context.userProvider.getLoginUsr();
-    final nextScreen = user?.sId == null ? const LoginScreen() : const HomeScreen();
+    final nextScreen =
+        user?.sId == null ? const LoginScreen() : const HomeScreen();
 
     // Fade transition to next screen
     if (!mounted) return;
