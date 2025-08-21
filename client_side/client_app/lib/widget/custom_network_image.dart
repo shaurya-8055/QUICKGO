@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:shimmer/shimmer.dart';
 
-Widget buildShimmerPlaceholder(double? width, double? height, BorderRadius? borderRadius) {
+Widget buildShimmerPlaceholder(
+    double? width, double? height, BorderRadius? borderRadius) {
   return Shimmer.fromColors(
     baseColor: Colors.grey[300]!,
     highlightColor: Colors.grey[100]!,
@@ -17,7 +18,8 @@ Widget buildShimmerPlaceholder(double? width, double? height, BorderRadius? bord
   );
 }
 
-Widget buildErrorWidget(double? width, double? height, BorderRadius? borderRadius) {
+Widget buildErrorWidget(
+    double? width, double? height, BorderRadius? borderRadius) {
   return Container(
     width: width,
     height: height,
@@ -120,34 +122,36 @@ class _FadeInNetworkImageState extends State<_FadeInNetworkImage> {
     return image;
   }
 
-Widget buildShimmerPlaceholder(double? width, double? height, BorderRadius? borderRadius) {
-  return Shimmer.fromColors(
-    baseColor: Colors.grey[300]!,
-    highlightColor: Colors.grey[100]!,
-    child: Container(
+  Widget buildShimmerPlaceholder(
+      double? width, double? height, BorderRadius? borderRadius) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: Colors.grey[300],
+          borderRadius: borderRadius,
+        ),
+      ),
+    );
+  }
+
+  Widget buildErrorWidget(
+      double? width, double? height, BorderRadius? borderRadius) {
+    return Container(
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: Colors.grey[300],
+        color: Colors.grey[200],
         borderRadius: borderRadius,
       ),
-    ),
-  );
-}
-
-Widget buildErrorWidget(double? width, double? height, BorderRadius? borderRadius) {
-  return Container(
-    width: width,
-    height: height,
-    decoration: BoxDecoration(
-      color: Colors.grey[200],
-      borderRadius: borderRadius,
-    ),
-    child: const Icon(
-      Icons.image_not_supported_outlined,
-      color: Colors.grey,
-      size: 32,
-    ),
-  );
-}
+      child: const Icon(
+        Icons.image_not_supported_outlined,
+        color: Colors.grey,
+        size: 32,
+      ),
+    );
+  }
 }

@@ -163,12 +163,15 @@ class _EnhancedCategorySelectorState extends State<EnhancedCategorySelector>
             onTap: () {
               Navigator.of(context).push(
                 PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) => ProductByCategoryScreen(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      ProductByCategoryScreen(
                     selectedCategory: widget.categories[index],
                   ),
-                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
                     final scale = Tween<double>(begin: 0.98, end: 1.0).animate(
-                      CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+                      CurvedAnimation(
+                          parent: animation, curve: Curves.easeOutCubic),
                     );
                     return ScaleTransition(
                       scale: scale,
