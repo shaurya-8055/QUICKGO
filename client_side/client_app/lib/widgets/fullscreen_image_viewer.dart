@@ -25,13 +25,10 @@ class FullscreenImageViewer extends StatelessWidget {
             itemCount: imageUrls.length,
             itemBuilder: (context, index) {
               return Center(
-                child: Hero(
-                  tag: '${heroTagPrefix}_$index',
-                  child: InteractiveViewer(
-                    child: CustomNetworkImage(
-                      imageUrl: imageUrls[index],
-                      fit: BoxFit.contain,
-                    ),
+                child: InteractiveViewer(
+                  child: CustomNetworkImage(
+                    imageUrl: imageUrls[index],
+                    fit: BoxFit.contain,
                   ),
                 ),
               );

@@ -1,3 +1,4 @@
+import '../widget/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -17,18 +18,12 @@ class ReviewImageGallery extends StatelessWidget {
 
   void _showFullScreenGallery(BuildContext context, int initialIndex) {
     Navigator.of(context).push(
-      PageRouteBuilder(
-        opaque: false,
-        pageBuilder: (context, animation, _) {
-          return FullScreenImageGallery(
-            images: images,
-            initialIndex: initialIndex,
-          );
-        },
-        transitionsBuilder: (context, animation, _, child) {
-          return FadeTransition(opacity: animation, child: child);
-        },
-        transitionDuration: const Duration(milliseconds: 300),
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (context) => FullScreenImageGallery(
+          images: images,
+          initialIndex: initialIndex,
+        ),
       ),
     );
   }
@@ -68,35 +63,12 @@ class ReviewImageGallery extends StatelessWidget {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      Image.network(
-                        displayImages[index],
+                      CustomNetworkImage(
+                        imageUrl: displayImages[index],
                         fit: BoxFit.cover,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Container(
-                            color: theme.colorScheme.surface,
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                value: loadingProgress.expectedTotalBytes !=
-                                        null
-                                    ? loadingProgress.cumulativeBytesLoaded /
-                                        loadingProgress.expectedTotalBytes!
-                                    : null,
-                              ),
-                            ),
-                          );
-                        },
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: theme.colorScheme.surface,
-                            child: Icon(
-                              Icons.image_not_supported,
-                              color:
-                                  theme.colorScheme.onSurface.withOpacity(0.4),
-                            ),
-                          );
-                        },
+                        borderRadius: BorderRadius.circular(8),
+                        width: imageHeight,
+                        height: imageHeight,
                       ),
                       if (showOverlay)
                         Container(

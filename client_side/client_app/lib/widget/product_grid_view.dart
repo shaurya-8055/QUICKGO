@@ -1,12 +1,12 @@
 // import 'package:client_app/widget/premium_product_card_refined.dart';
 import 'package:flutter/material.dart';
 
-import 'package:animations/animations.dart';
+// import 'package:animations/animations.dart';
 import 'package:provider/provider.dart';
 
 import '../models/product.dart';
 import '../screen/product_details_screen/product_detail_screen.dart';
-import '../utility/animation/open_container_wrapper.dart';
+// import '../utility/animation/open_container_wrapper.dart';
 import '../screen/product_cart_screen/provider/cart_provider.dart';
 import 'premium_product_card.dart';
 
@@ -35,10 +35,14 @@ class ProductGridView extends StatelessWidget {
         ),
         itemBuilder: (context, index) {
           Product product = items[index];
-          return OpenContainerWrapper(
-            nextScreen: ProductDetailScreen(product),
-            transitionType: ContainerTransitionType.fadeThrough,
-            borderRadius: 22,
+          return GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => ProductDetailScreen(product),
+                ),
+              );
+            },
             child: PremiumProductCard(
               product: product,
               onAddToCart: () {
