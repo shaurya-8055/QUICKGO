@@ -4,7 +4,7 @@ import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import 'components/custom_app_bar.dart';
 import '../../../../widget/masonry_product_grid_view.dart';
-import 'components/category_selector.dart';
+import 'components/enhanced_category_selector.dart';
 import 'components/poster_section.dart';
 import '../all_categories_screen.dart';
 import '../../utility/animation/animated_button.dart';
@@ -233,7 +233,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   // Enhanced Category Selector
                   Consumer<DataProvider>(
                     builder: (context, dataProvider, child) {
-                      return CategorySelector(
+                      return EnhancedCategorySelector(
                         categories: dataProvider.categories,
                       );
                     },

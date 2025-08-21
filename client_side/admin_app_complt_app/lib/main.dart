@@ -14,6 +14,7 @@ import 'screens/notification/provider/notification_provider.dart';
 import 'screens/order/provider/order_provider.dart';
 import 'screens/posters/provider/poster_provider.dart';
 import 'screens/service_requests/provider/service_provider.dart';
+import 'screens/service_requests/provider/technician_provider.dart';
 import 'screens/sub_category/provider/sub_category_provider.dart';
 import 'screens/variants/provider/variant_provider.dart';
 import 'screens/variants_type/provider/variant_type_provider.dart';
@@ -46,6 +47,7 @@ void main() {
     ChangeNotifierProvider(
         create: (context) => NotificationProvider(context.dataProvider)),
     ChangeNotifierProvider(create: (context) => ServiceProvider()),
+    ChangeNotifierProvider(create: (context) => TechnicianProvider()),
   ], child: MyApp()));
 }
 

@@ -1,13 +1,29 @@
 // Production URL pointing to your deployed Render server
 const String _PRODUCTION_URL = 'https://quickgo-tpum.onrender.com';
 
+// Use dart-define API_BASE_URL if provided, otherwise fallback to localhost
+const String _DEFAULT_URL = 'http://localhost:3000';
+
 // Backwards-compat constant (some old code may read this), but prefer getMainUrl().
-const String MAIN_URL = _PRODUCTION_URL;
+const String MAIN_URL =
+    String.fromEnvironment('API_BASE_URL', defaultValue: _DEFAULT_URL);
 
 // Determine the correct base URL for the current platform.
 String getMainUrl() {
-  // Always use production URL for deployed app
+  // Use dart-define API_BASE_URL if provided
+  const String envUrl = String.fromEnvironment('API_BASE_URL');
+  if (envUrl.isNotEmpty) {
+    return envUrl;
+  }
+
+  // Use production server for APK builds and device testing
   return _PRODUCTION_URL;
+
+  // For local development with physical device, uncomment this:
+  // return _LOCAL_DEV_URL;
+
+  // For emulator testing, uncomment this:
+  // return _DEFAULT_URL;
 
   // For local development, uncomment these imports and modify return logic:
   // import 'dart:io' show Platform;

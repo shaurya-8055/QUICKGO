@@ -8,15 +8,14 @@ import '../../posters/poster_screen.dart';
 import '../../variants/variants_screen.dart';
 import '../../variants_type/variants_type_screen.dart';
 import '../../service_requests/service_requests_screen.dart';
+import '../../technician_management/technician_management_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../sub_category/sub_category_screen.dart';
 
-class MainScreenProvider extends ChangeNotifier{
+class MainScreenProvider extends ChangeNotifier {
   Widget selectedScreen = DashboardScreen();
-
-
 
   //? to update screen when click tab on side bar
   navigateToScreen(String screenName) {
@@ -54,11 +53,12 @@ class MainScreenProvider extends ChangeNotifier{
       case 'ServiceRequests':
         selectedScreen = ServiceRequestsScreen();
         break;
+      case 'Technicians':
+        selectedScreen = TechnicianManagementScreen();
+        break;
       default:
         selectedScreen = DashboardScreen();
     }
     notifyListeners();
   }
-  
-  
 }

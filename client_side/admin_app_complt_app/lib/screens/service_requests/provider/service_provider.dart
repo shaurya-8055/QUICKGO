@@ -120,6 +120,55 @@ class ServiceProvider extends ChangeNotifier {
     }
   }
 
+  // Admin: update service request status and assignee
+  Future<(bool, String)> updateServiceRequest({
+    required String id,
+    String? status,
+    String? assigneeId,
+    String? assigneeName,
+    String? assigneePhone,
+    String? notes,
+  }) async {
+    try {
+      _setSubmitting(true);
+      final payload = <String, dynamic>{};
+      if (status != null) payload['status'] = status;
+      if (assigneeId != null) payload['assigneeId'] = assigneeId;
+      if (assigneeName != null) payload['assigneeName'] = assigneeName;
+      if (assigneePhone != null) payload['assigneePhone'] = assigneePhone;
+      if (notes != null && notes.isNotEmpty) payload['notes'] = notes;
+
+      final Response res = await _http.patchItem(
+        endpointUrl: 'service-requests',
+        itemId: id,
+        itemData: payload,
+      );
+
+      if (res.isOk) {
+        final api = ApiResponse.fromJson(res.body, (obj) => obj);
+        if (api.success) {
+          SnackBarHelper.showSuccessSnackBar(api.message);
+          return (true, api.message);
+        } else {
+          SnackBarHelper.showErrorSnackBar(api.message);
+          return (false, api.message);
+        }
+      } else {
+        final msg = res.body?['message']?.toString() ??
+            res.statusText ??
+            'Update failed';
+        SnackBarHelper.showErrorSnackBar(msg);
+        return (false, msg);
+      }
+    } catch (e) {
+      final msg = e.toString();
+      SnackBarHelper.showErrorSnackBar(msg);
+      return (false, msg);
+    } finally {
+      _setSubmitting(false);
+    }
+  }
+
   // Admin: delete a request (optional cleanup)
   Future<(bool, String)> deleteRequest(String id) async {
     try {

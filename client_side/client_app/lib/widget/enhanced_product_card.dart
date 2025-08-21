@@ -461,26 +461,30 @@ class _EnhancedProductCardState extends State<EnhancedProductCard>
                           // Product Details Section
                           Expanded(
                             flex: 2,
-                            child: Padding(
+                            child: Container(
+                              height: 140, // Fixed height to prevent overflow
                               padding: const EdgeInsets.all(16),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   // Product Name
-                                  Text(
-                                    widget.product.name ?? 'Unknown Product',
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700,
-                                      color: Color(0xFF2D3436),
-                                      letterSpacing: -0.2,
-                                      height: 1.2,
+                                  Flexible(
+                                    child: Text(
+                                      widget.product.name ?? 'Unknown Product',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xFF2D3436),
+                                        letterSpacing: -0.2,
+                                        height: 1.2,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
 
-                                  const SizedBox(height: 8),
+                                  const SizedBox(height: 6),
 
                                   // Category
                                   if (widget.product.proCategoryId?.name !=
@@ -505,11 +509,13 @@ class _EnhancedProductCardState extends State<EnhancedProductCard>
                                       ),
                                     ),
 
-                                  const Spacer(),
+                                  const SizedBox(height: 6),
 
                                   // Price Section
-                                  Row(
-                                    children: [
+                                  SizedBox(
+                                    height: 40, // Fixed height for price section
+                                    child: Row(
+                                      children: [
                                       // Current Price
                                       Text(
                                         CurrencyHelper.formatCurrency(
@@ -602,7 +608,8 @@ class _EnhancedProductCardState extends State<EnhancedProductCard>
                                           ],
                                         ),
                                       ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),

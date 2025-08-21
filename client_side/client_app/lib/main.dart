@@ -5,6 +5,7 @@ import 'screen/product_cart_screen/provider/cart_provider.dart';
 import 'screen/product_details_screen/provider/product_detail_provider.dart';
 import 'screen/product_favorite_screen/provider/favorite_provider.dart';
 import 'screen/profile_screen/provider/profile_provider.dart';
+import 'core/providers/pagination_provider.dart';
 import 'utility/app_theme.dart';
 import 'utility/extensions.dart';
 import 'package:flutter/material.dart';
@@ -50,6 +51,7 @@ Future<void> main() async {
       providers: [
         ChangeNotifierProvider(create: (context) => ThemeProvider()),
         ChangeNotifierProvider(create: (context) => DataProvider()),
+        ChangeNotifierProvider(create: (context) => PaginationProvider()),
         ChangeNotifierProvider(create: (context) => NotificationsProvider()),
         ChangeNotifierProvider(create: (context) => UserProvider()),
         ChangeNotifierProvider(

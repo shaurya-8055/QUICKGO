@@ -104,7 +104,7 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
                         icon: const Icon(Icons.calendar_month_rounded),
                         label: Text(_preferredDate == null
                             ? 'Pick date'
-                            : '${_preferredDate!.day}/${_preferredDate!.month}/${_preferredDate!.year}'),
+                            : '${_preferredDate?.day ?? ''}/${_preferredDate?.month ?? ''}/${_preferredDate?.year ?? ''}'),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -121,7 +121,7 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
                         icon: const Icon(Icons.schedule_rounded),
                         label: Text(_preferredTime == null
                             ? 'Pick time'
-                            : _preferredTime!.format(context)),
+                            : _preferredTime?.format(context) ?? 'Pick time'),
                       ),
                     ),
                   ],
@@ -144,44 +144,82 @@ class _ServiceBookingScreenState extends State<ServiceBookingScreen> {
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (_formKey.currentState?.validate() != true) return;
     if (_preferredDate == null || _preferredTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please pick preferred date and time')),
       );
       return;
     }
-    final timeLabel = _preferredTime!.format(context);
-    final userId = context.read<UserProvider>().getLoginUsr()?.sId;
-    final (ok, msg) =
-        await context.read<ServiceProvider>().createServiceRequest(
-              category: widget.category,
-              customerName: _nameCtrl.text.trim(),
-              phone: _phoneCtrl.text.trim(),
-              address: _addressCtrl.text.trim(),
-              description:
-                  _descCtrl.text.trim().isEmpty ? null : _descCtrl.text.trim(),
-              preferredDate: _preferredDate!,
-              preferredTime: timeLabel,
-              userId: userId,
-            );
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg)),
-    );
-    if (ok) {
-      // Add an in-app notification entry
-      try {
-        context.read<NotificationsProvider>().add(
-              AppNotification(
-                id: DateTime.now().millisecondsSinceEpoch.toString(),
-                title: 'Service booking submitted',
-                body: '${widget.category} • $timeLabel',
-                timestamp: DateTime.now(),
-                read: false,
-              ),
-            );
-      } catch (_) {}
-      Navigator.of(context).pop();
+    final timeLabel = _preferredTime?.format(context) ?? '';
+
+    try {
+      final userProvider = context.read<UserProvider>();
+      final user = userProvider.getLoginUsr();
+      final userId = user?.sId;
+
+      if (userId == null || userId.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please login to continue')),
+        );
+        return;
+      }
+
+      final serviceProvider = context.read<ServiceProvider>();
+      final (ok, msg) = await serviceProvider.createServiceRequest(
+        category: widget.category,
+        customerName: _nameCtrl.text.trim(),
+        phone: _phoneCtrl.text.trim(),
+        address: _addressCtrl.text.trim(),
+        description:
+            _descCtrl.text.trim().isEmpty ? null : _descCtrl.text.trim(),
+        preferredDate: _preferredDate ?? DateTime.now(),
+        preferredTime: timeLabel,
+        userId: userId,
+      );
+
+      if (!mounted) return; // Check if widget is still mounted
+
+      // Show appropriate success/error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              ok ? 'Service booking request submitted successfully!' : msg),
+          backgroundColor: ok ? Colors.green : Colors.red,
+          duration: Duration(seconds: ok ? 3 : 5),
+        ),
+      );
+
+      if (ok) {
+        // Add an in-app notification entry safely
+        try {
+          context.read<NotificationsProvider>().add(
+                AppNotification(
+                  id: DateTime.now().millisecondsSinceEpoch.toString(),
+                  title: 'Service booking submitted',
+                  body: '${widget.category} • $timeLabel',
+                  timestamp: DateTime.now(),
+                  read: false,
+                ),
+              );
+        } catch (e) {
+          // Silently handle notification error - booking was still successful
+          print('Notification error: $e');
+        }
+
+        // Add delay to allow SnackBar to be visible before navigating back
+        await Future.delayed(const Duration(milliseconds: 1500));
+
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
+      return;
     }
   }
 }

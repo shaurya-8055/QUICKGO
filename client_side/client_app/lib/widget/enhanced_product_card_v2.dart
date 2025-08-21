@@ -473,7 +473,8 @@ class _EnhancedProductCardState extends State<EnhancedProductCard>
                             // Product Details Section
                             Expanded(
                               flex: 2,
-                              child: Padding(
+                              child: Container(
+                                height: 140, // Fixed height to prevent overflow
                                 padding: const EdgeInsets.all(16),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,

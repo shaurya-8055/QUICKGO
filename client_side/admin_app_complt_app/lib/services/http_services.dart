@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../utility/constants.dart';
 
 class HttpService {
+  // Use dynamic MAIN_URL that respects dart-define
   final String baseUrl = MAIN_URL;
 
   //? to send get request

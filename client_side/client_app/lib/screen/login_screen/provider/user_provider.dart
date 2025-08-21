@@ -162,8 +162,20 @@ class UserProvider extends ChangeNotifier {
   //? to get the login user detail from any whre the app
   User? getLoginUsr() {
     Map<String, dynamic>? userJson = box.read(USER_INFO_BOX);
-    User? userLogged = User.fromJson(userJson ?? {});
-    return userLogged;
+    if (userJson == null || userJson.isEmpty) {
+      return null;
+    }
+    try {
+      User? userLogged = User.fromJson(userJson);
+      // Return null if the user doesn't have a valid sId
+      if (userLogged.sId == null || userLogged.sId!.isEmpty) {
+        return null;
+      }
+      return userLogged;
+    } catch (e) {
+      print('Error parsing user data: $e');
+      return null;
+    }
   }
 
   //? to logout the user

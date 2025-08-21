@@ -47,8 +47,9 @@ class MasonryProductGridView extends StatelessWidget {
       itemCount: items.length,
       itemBuilder: (context, index) {
         final product = items[index];
-        // Use a uniform taller height so all cards look the same size
-        const double uniformHeight = 420;
+        // Use a stable height that was working in earlier APK - reverted to stable version
+        const double uniformHeight =
+            380; // Reverted to stable working height from earlier APK
         return OpenContainerWrapper(
           nextScreen: ProductDetailScreen(product),
           borderRadius: 22,
