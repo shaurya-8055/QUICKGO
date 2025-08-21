@@ -159,36 +159,35 @@ class _EnhancedCategorySelectorState extends State<EnhancedCategorySelector>
             return const SizedBox.shrink();
           }
 
-          return AnimatedBuilder(
-            animation: _itemAnimations[index],
-            builder: (context, child) {
-              return Transform.scale(
-                scale: _itemAnimations[index].value,
-                child: Transform.translate(
-                  offset: Offset(
-                      0,
-                      30 *
-                          (1 - _itemAnimations[index].value)), // Reduced bounce
-                  child: Opacity(
-                    opacity: (_itemAnimations[index].value.clamp(0.0, 1.0))
-                        .toDouble(),
-                    child: Container(
-                      margin: EdgeInsets.symmetric(horizontal: spacing / 2),
-                      child: OpenContainerWrapper(
-                        nextScreen: ProductByCategoryScreen(
-                            selectedCategory: widget.categories[index]),
-                        child: PremiumCategoryCard(
-                          category: category,
-                          index: index,
-                          width: cardW,
-                          height: cardH,
-                        ),
-                      ),
-                    ),
+          return GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) => ProductByCategoryScreen(
+                    selectedCategory: widget.categories[index],
                   ),
+                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                    final scale = Tween<double>(begin: 0.98, end: 1.0).animate(
+                      CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+                    );
+                    return ScaleTransition(
+                      scale: scale,
+                      child: child,
+                    );
+                  },
+                  transitionDuration: const Duration(milliseconds: 220),
                 ),
               );
             },
+            child: Container(
+              margin: EdgeInsets.symmetric(horizontal: spacing / 2),
+              child: PremiumCategoryCard(
+                category: category,
+                index: index,
+                width: cardW,
+                height: cardH,
+              ),
+            ),
           );
         },
       ),

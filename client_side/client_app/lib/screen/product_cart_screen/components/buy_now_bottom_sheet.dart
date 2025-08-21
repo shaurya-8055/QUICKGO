@@ -12,7 +12,6 @@ import '../../../widget/custom_text_field.dart';
 
 void showCustomBottomSheet(BuildContext context) {
   context.cartProvider.clearCouponDiscount();
-  context.cartProvider.retrieveSavedAddress();
   showModalBottomSheet(
     context: context,
     builder: (context) {
@@ -41,32 +40,23 @@ void showCustomBottomSheet(BuildContext context) {
 
                 Consumer<CartProvider>(
                   builder: (context, cartProvider, child) {
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      padding: cartProvider.isExpanded
-                          ? const EdgeInsets.all(10)
-                          : EdgeInsets.zero,
-                      margin: cartProvider.isExpanded
-                          ? const EdgeInsets.only(bottom: 10)
-                          : EdgeInsets.zero,
-                      height: cartProvider.isExpanded ? null : 0,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: cartProvider.isExpanded
-                            ? [
+                    return cartProvider.isExpanded
+                        ? Container(
+                            padding: const EdgeInsets.all(10),
+                            margin: const EdgeInsets.only(bottom: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
                                 BoxShadow(
                                   color: Colors.grey.withOpacity(0.2),
                                   spreadRadius: 2,
                                   blurRadius: 4,
                                   offset: const Offset(0, 3),
                                 ),
-                              ]
-                            : [],
-                      ),
-                      child: cartProvider.isExpanded
-                          ? Column(
+                              ],
+                            ),
+                            child: Column(
                               children: [
                                 CustomTextField(
                                   height: 65,
@@ -136,9 +126,9 @@ void showCustomBottomSheet(BuildContext context) {
                                   ],
                                 ),
                               ],
-                            )
-                          : null,
-                    );
+                            ),
+                          )
+                        : const SizedBox.shrink();
                   },
                 ),
 

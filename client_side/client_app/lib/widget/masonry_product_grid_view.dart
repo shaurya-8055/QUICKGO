@@ -50,9 +50,14 @@ class MasonryProductGridView extends StatelessWidget {
         // Use a stable height that was working in earlier APK - reverted to stable version
         const double uniformHeight =
             380; // Reverted to stable working height from earlier APK
-        return OpenContainerWrapper(
-          nextScreen: ProductDetailScreen(product),
-          borderRadius: 22,
+        return GestureDetector(
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => ProductDetailScreen(product),
+              ),
+            );
+          },
           child: SizedBox(
             height: uniformHeight,
             child: PremiumProductCard(

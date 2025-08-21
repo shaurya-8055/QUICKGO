@@ -138,16 +138,21 @@ class _OptimizedProductGridState extends State<OptimizedProductGrid>
   Widget _buildProductCard(int index) {
     final product = widget.products[index];
 
-    return OpenContainerWrapper(
-      nextScreen: ProductDetailScreen(product),
-      borderRadius: 16,
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ProductDetailScreen(product),
+          ),
+        );
+      },
       child: OptimizedProductCard(
         product: product,
-        isVisible: true, // Simplified for now, always visible
         onAddToCart: () {
           context.read<CartProvider>().addProductToCart(product);
           _showAddToCartFeedback();
         },
+        isVisible: true, // Simplified for now, always visible
       ),
     );
   }

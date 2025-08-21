@@ -165,7 +165,7 @@ class CartProvider extends ChangeNotifier {
           "phone": phoneController.text,
           "street": streetController.text,
           "city": cityController.text,
-          "state": streetController.text,
+          "state": stateController.text,
           "postalCode": postalCodeController.text,
           "country": countryController.text
         },
