@@ -66,27 +66,40 @@ class CartScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Select Delivery Address', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      Text('Select Delivery Address',
+                          style: theme.textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 8),
                       ...List.generate(profileProvider.addresses.length, (i) {
                         final address = profileProvider.addresses[i];
-                        final isSelected = profileProvider.selectedAddressIndex == i;
+                        final isSelected =
+                            profileProvider.selectedAddressIndex == i;
                         return GestureDetector(
                           onTap: () => profileProvider.selectAddress(i),
                           child: Container(
                             margin: const EdgeInsets.symmetric(vertical: 4),
                             decoration: BoxDecoration(
-                              color: isSelected ? cs.primary.withOpacity(0.12) : Colors.transparent,
+                              color: isSelected
+                                  ? cs.primary.withOpacity(0.12)
+                                  : Colors.transparent,
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: isSelected ? cs.primary : cs.outline.withOpacity(0.2),
+                                color: isSelected
+                                    ? cs.primary
+                                    : cs.outline.withOpacity(0.2),
                                 width: isSelected ? 2 : 1,
                               ),
                             ),
                             child: ListTile(
-                              title: Text(address.phone, style: const TextStyle(fontWeight: FontWeight.bold)),
-                              subtitle: Text('${address.street}, ${address.city}, ${address.state} ${address.postalCode}, ${address.country}'),
-                              trailing: isSelected ? const Icon(Icons.check_circle, color: Colors.deepPurple) : null,
+                              title: Text(address.phone,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold)),
+                              subtitle: Text(
+                                  '${address.street}, ${address.city}, ${address.state} ${address.postalCode}, ${address.country}'),
+                              trailing: isSelected
+                                  ? const Icon(Icons.check_circle,
+                                      color: Colors.deepPurple)
+                                  : null,
                               onTap: () => profileProvider.selectAddress(i),
                             ),
                           ),

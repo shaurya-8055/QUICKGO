@@ -34,6 +34,5 @@ class Address {
       };
 
   @override
-  String toString() =>
-      '$phone\n$street, $city, $state $postalCode, $country';
+  String toString() => '$phone\n$street, $city, $state $postalCode, $country';
 }

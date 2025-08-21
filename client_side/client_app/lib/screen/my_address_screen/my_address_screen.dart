@@ -1,4 +1,3 @@
-
 import '../../utility/extensions.dart';
 import 'package:flutter/material.dart';
 import '../../utility/app_color.dart';
@@ -23,7 +22,10 @@ class _MyAddressPageState extends State<MyAddressPage> {
       appBar: AppBar(
         title: const Text(
           "Addresses",
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColor.darkOrange),
+          style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: AppColor.darkOrange),
         ),
       ),
       body: Padding(
@@ -42,10 +44,13 @@ class _MyAddressPageState extends State<MyAddressPage> {
                     onTap: () => provider.selectAddress(index),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: isSelected ? const Color(0xFFe6e6fa) : Colors.white,
+                        color:
+                            isSelected ? const Color(0xFFe6e6fa) : Colors.white,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: isSelected ? AppColor.darkOrange : Colors.grey.shade300,
+                          color: isSelected
+                              ? AppColor.darkOrange
+                              : Colors.grey.shade300,
                           width: isSelected ? 2 : 1,
                         ),
                         boxShadow: [
@@ -58,15 +63,20 @@ class _MyAddressPageState extends State<MyAddressPage> {
                         ],
                       ),
                       child: ListTile(
-                        title: Text(address.phone, style: const TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Text('${address.street}, ${address.city}, ${address.state} ${address.postalCode}, ${address.country}'),
+                        title: Text(address.phone,
+                            style:
+                                const TextStyle(fontWeight: FontWeight.bold)),
+                        subtitle: Text(
+                            '${address.street}, ${address.city}, ${address.state} ${address.postalCode}, ${address.country}'),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             if (isSelected)
-                              const Icon(Icons.check_circle, color: AppColor.darkOrange),
+                              const Icon(Icons.check_circle,
+                                  color: AppColor.darkOrange),
                             IconButton(
-                              icon: const Icon(Icons.edit, color: Colors.blueAccent),
+                              icon: const Icon(Icons.edit,
+                                  color: Colors.blueAccent),
                               onPressed: () {
                                 setState(() {
                                   showForm = true;
@@ -76,7 +86,8 @@ class _MyAddressPageState extends State<MyAddressPage> {
                               },
                             ),
                             IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.redAccent),
+                              icon: const Icon(Icons.delete,
+                                  color: Colors.redAccent),
                               onPressed: () => setState(() {
                                 provider.removeAddress(index);
                               }),
@@ -94,7 +105,8 @@ class _MyAddressPageState extends State<MyAddressPage> {
               const SizedBox(height: 16),
               Card(
                 elevation: 4,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
                 surfaceTintColor: Colors.white,
                 child: Padding(
                   padding: const EdgeInsets.all(20),
@@ -108,25 +120,30 @@ class _MyAddressPageState extends State<MyAddressPage> {
                           onSave: (value) {},
                           inputType: TextInputType.number,
                           controller: provider.phoneController,
-                          validator: (value) => value!.isEmpty ? 'Please enter a phone number' : null,
+                          validator: (value) => value!.isEmpty
+                              ? 'Please enter a phone number'
+                              : null,
                         ),
                         CustomTextField(
                           labelText: 'Street',
                           onSave: (val) {},
                           controller: provider.streetController,
-                          validator: (value) => value!.isEmpty ? 'Please enter a street' : null,
+                          validator: (value) =>
+                              value!.isEmpty ? 'Please enter a street' : null,
                         ),
                         CustomTextField(
                           labelText: 'City',
                           onSave: (value) {},
                           controller: provider.cityController,
-                          validator: (value) => value!.isEmpty ? 'Please enter a city' : null,
+                          validator: (value) =>
+                              value!.isEmpty ? 'Please enter a city' : null,
                         ),
                         CustomTextField(
                           labelText: 'State',
                           onSave: (value) {},
                           controller: provider.stateController,
-                          validator: (value) => value!.isEmpty ? 'Please enter a state' : null,
+                          validator: (value) =>
+                              value!.isEmpty ? 'Please enter a state' : null,
                         ),
                         Row(
                           children: [
@@ -136,7 +153,9 @@ class _MyAddressPageState extends State<MyAddressPage> {
                                 onSave: (value) {},
                                 inputType: TextInputType.number,
                                 controller: provider.postalCodeController,
-                                validator: (value) => value!.isEmpty ? 'Please enter a code' : null,
+                                validator: (value) => value!.isEmpty
+                                    ? 'Please enter a code'
+                                    : null,
                               ),
                             ),
                             const SizedBox(width: 10),
@@ -145,7 +164,9 @@ class _MyAddressPageState extends State<MyAddressPage> {
                                 labelText: 'Country',
                                 onSave: (value) {},
                                 controller: provider.countryController,
-                                validator: (value) => value!.isEmpty ? 'Please enter a country' : null,
+                                validator: (value) => value!.isEmpty
+                                    ? 'Please enter a country'
+                                    : null,
                               ),
                             ),
                           ],
@@ -169,12 +190,16 @@ class _MyAddressPageState extends State<MyAddressPage> {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColor.darkOrange,
                                 foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 24, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30)),
                               ),
                               onPressed: () {
-                                if (provider.addressFormKey.currentState!.validate()) {
-                                  provider.addOrUpdateAddress(index: editingIndex);
+                                if (provider.addressFormKey.currentState!
+                                    .validate()) {
+                                  provider.addOrUpdateAddress(
+                                      index: editingIndex);
                                   setState(() {
                                     showForm = false;
                                     editingIndex = null;
@@ -182,7 +207,11 @@ class _MyAddressPageState extends State<MyAddressPage> {
                                   provider.clearAddressControllers();
                                 }
                               },
-                              child: Text(editingIndex != null ? 'Update Address' : 'Add Address', style: const TextStyle(fontSize: 16)),
+                              child: Text(
+                                  editingIndex != null
+                                      ? 'Update Address'
+                                      : 'Add Address',
+                                  style: const TextStyle(fontSize: 16)),
                             ),
                           ],
                         ),
