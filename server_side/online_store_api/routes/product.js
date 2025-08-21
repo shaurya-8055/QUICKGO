@@ -78,11 +78,12 @@ router.post('/', asyncHandler(async (req, res) => {
 
             // Iterate over the file fields
             const fields = ['image1', 'image2', 'image3', 'image4', 'image5'];
-        const base = process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get('host')}`;
-        fields.forEach((field, index) => {
+            // Always use production URL to prevent localhost URLs in database
+            const base = process.env.PUBLIC_BASE_URL || 'https://quickgo-tpum.onrender.com';
+            fields.forEach((field, index) => {
                 if (req.files[field] && req.files[field].length > 0) {
                     const file = req.files[field][0];
-            const imageUrl = `${base}/image/products/${file.filename}`;
+                    const imageUrl = `${base}/image/products/${file.filename}`;
                     imageUrls.push({ image: index + 1, url: imageUrl });
                 }
             });
@@ -143,12 +144,13 @@ router.put('/:id', asyncHandler(async (req, res) => {
             productToUpdate.proVariantId = proVariantId || productToUpdate.proVariantId;
 
             // Iterate over the file fields to update images
-        const fields = ['image1', 'image2', 'image3', 'image4', 'image5'];
-        const base = process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get('host')}`;
+            const fields = ['image1', 'image2', 'image3', 'image4', 'image5'];
+            // Always use production URL to prevent localhost URLs in database
+            const base = process.env.PUBLIC_BASE_URL || 'https://quickgo-tpum.onrender.com';
             fields.forEach((field, index) => {
                 if (req.files[field] && req.files[field].length > 0) {
                     const file = req.files[field][0];
-            const imageUrl = `${base}/image/products/${file.filename}`;
+                    const imageUrl = `${base}/image/products/${file.filename}`;
                     // Update the specific image URL in the images array
                     let imageEntry = productToUpdate.images.find(img => img.image === (index + 1));
                     if (imageEntry) {

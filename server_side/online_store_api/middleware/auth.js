@@ -94,4 +94,8 @@ function optionalAuth() {
   };
 }
 
-module.exports = { auth, optionalAuth };
+module.exports = { 
+  auth, 
+  optionalAuth,
+  authenticateToken: auth() // Default auth without role requirement
+};

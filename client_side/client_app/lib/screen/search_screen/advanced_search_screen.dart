@@ -217,7 +217,7 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen>
                             Icons.tune,
                             color: showFilters
                                 ? const Color(0xFF667eea)
-                                : Colors.grey,
+                                : Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                       ),
@@ -395,7 +395,9 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen>
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                      border: Border.all(
+                          color:
+                              Theme.of(context).dividerColor.withOpacity(0.3)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,

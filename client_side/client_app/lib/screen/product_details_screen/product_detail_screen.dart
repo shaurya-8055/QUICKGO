@@ -3,11 +3,25 @@ import 'provider/product_detail_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
+import 'package:get_storage/get_storage.dart';
 import '../../models/product.dart';
+import '../../models/user.dart';
 import '../../utility/currency_helper.dart';
 import '../../utility/app_colors.dart';
+import '../../utility/constants.dart';
 import '../product_favorite_screen/provider/favorite_provider.dart';
-import '../../widget/custom_network_image.dart';
+// import '../../widget/custom_network_image.dart';
+import '../../utility/image_loader.dart';
+import '../../utility/offline_cache_helper.dart';
+import '../../utility/accessibility_helper.dart';
+import '../../widgets/animated_advanced_reviews_section.dart';
+// import '../../widgets/enhanced_review_card.dart';
+import '../../widgets/modern_review_carousel.dart';
+import '../../widgets/fullscreen_image_viewer.dart';
+import '../../models/review.dart';
+import '../../data/dummy_review_data.dart';
+import 'dart:async';
+
 import 'dart:ui';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -15,12 +29,69 @@ class ProductDetailScreen extends StatefulWidget {
 
   const ProductDetailScreen(this.product, {super.key});
 
-  @override
   State<ProductDetailScreen> createState() => _ProductDetailScreenState();
 }
 
 class _ProductDetailScreenState extends State<ProductDetailScreen>
     with TickerProviderStateMixin {
+  Map<String, dynamic>? _offlineProductData;
+  bool _isOffline = false;
+  // Carousel controller for reviews
+  final PageController _reviewCarouselController =
+      PageController(viewportFraction: 0.88);
+  int _currentReviewPage = 0;
+  List<Review> _carouselReviews = [];
+  Timer? _carouselTimer;
+
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Load reviews for carousel (first 5 dummy reviews)
+    _carouselReviews =
+        DummyReviewData.getReviewsForProduct(widget.product?.sId ?? '')
+            .take(5)
+            .toList();
+    _startCarouselAutoScroll();
+    _loadOfflineProductIfNeeded();
+  }
+
+  Future<void> _loadOfflineProductIfNeeded() async {
+    if (widget.product == null || widget.product!.sId == null) return;
+    // Try to get cached product data
+    final cached = await OfflineCacheHelper.getProduct(widget.product!.sId!);
+    if (cached != null) {
+      setState(() {
+        _offlineProductData = cached;
+        _isOffline = true;
+      });
+    }
+  }
+
+  void _startCarouselAutoScroll() {
+    _carouselTimer?.cancel();
+    if (_carouselReviews.length <= 1) return;
+    _carouselTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (_reviewCarouselController.hasClients) {
+        _currentReviewPage = (_currentReviewPage + 1) % _carouselReviews.length;
+        _reviewCarouselController.animateToPage(
+          _currentReviewPage,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _carouselTimer?.cancel();
+    _reviewCarouselController.dispose();
+    _animationController.dispose();
+    _slideController.dispose();
+    _fadeController.dispose();
+    _pageController.dispose();
+    super.dispose();
+  }
+
   late AnimationController _animationController;
   late AnimationController _slideController;
   late AnimationController _fadeController;
@@ -64,23 +135,40 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     _fadeController.forward();
   }
 
-  @override
-  void dispose() {
-    _animationController.dispose();
-    _slideController.dispose();
-    _fadeController.dispose();
-    _pageController.dispose();
-    super.dispose();
+  String? _getCurrentUserId() {
+    final box = GetStorage();
+    Map<String, dynamic>? userJson = box.read(USER_INFO_BOX);
+    if (userJson == null || userJson.isEmpty) {
+      return null;
+    }
+    try {
+      User? user = User.fromJson(userJson);
+      return user.sId;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  String? _getCurrentUserToken() {
+    final box = GetStorage();
+    return box.read(AUTH_TOKEN_BOX) as String?;
   }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.product == null) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final product = _isOffline && _offlineProductData != null
+        ? Product.fromJson(_offlineProductData!)
+        : widget.product;
+    if (product == null) {
       return Scaffold(
         body: Center(
           child: Text(
             "Product not available",
-            style: Theme.of(context).textTheme.headlineMedium,
+            style: AccessibilityHelper.accessibleTextStyle(context,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: colorScheme.onSurface),
           ),
         ),
       );
@@ -88,15 +176,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-      backgroundColor: AppColors.surface,
+      backgroundColor: colorScheme.background,
       body: CustomScrollView(
         slivers: [
           _buildAppBar(context),
           SliverToBoxAdapter(
             child: Column(
               children: [
-                _buildImageCarousel(),
-                _buildProductInfo(),
+                _buildImageCarousel(product: product),
+                _buildProductInfo(product: product),
               ],
             ),
           ),
@@ -117,10 +205,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
       leading: Container(
         margin: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: AppColors.surface.withOpacity(0.95),
+          color: Theme.of(context).colorScheme.surface.withOpacity(0.95),
           borderRadius: AppRadius.mdRadius,
           boxShadow: AppShadows.medium,
-          border: Border.all(color: AppColors.border.withOpacity(0.1)),
+          border: Border.all(
+              color: Theme.of(context).dividerColor.withOpacity(0.1)),
         ),
         child: Material(
           color: Colors.transparent,
@@ -130,7 +219,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
             onTap: () => Navigator.pop(context),
             child: Icon(
               Icons.arrow_back_ios_new,
-              color: AppColors.textPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
               size: 20,
             ),
           ),
@@ -140,10 +229,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
         Container(
           margin: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppColors.surface.withOpacity(0.95),
+            color: Theme.of(context).colorScheme.surface.withOpacity(0.95),
             borderRadius: AppRadius.mdRadius,
             boxShadow: AppShadows.medium,
-            border: Border.all(color: AppColors.border.withOpacity(0.1)),
+            border: Border.all(
+                color: Theme.of(context).dividerColor.withOpacity(0.1)),
           ),
           child: Material(
             color: Colors.transparent,
@@ -163,8 +253,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                     padding: const EdgeInsets.all(12),
                     child: Icon(
                       isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color:
-                          isFavorite ? AppColors.error : AppColors.textPrimary,
+                      color: isFavorite
+                          ? Theme.of(context).colorScheme.error
+                          : Theme.of(context).colorScheme.onSurface,
                       size: 20,
                     ),
                   ),
@@ -176,10 +267,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
         Container(
           margin: const EdgeInsets.only(right: 16, top: 8, bottom: 8),
           decoration: BoxDecoration(
-            color: AppColors.surface.withOpacity(0.95),
+            color: Theme.of(context).colorScheme.surface.withOpacity(0.95),
             borderRadius: AppRadius.mdRadius,
             boxShadow: AppShadows.medium,
-            border: Border.all(color: AppColors.border.withOpacity(0.1)),
+            border: Border.all(
+                color: Theme.of(context).dividerColor.withOpacity(0.1)),
           ),
           child: Material(
             color: Colors.transparent,
@@ -193,7 +285,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                 padding: const EdgeInsets.all(12),
                 child: Icon(
                   Icons.share_outlined,
-                  color: AppColors.textPrimary,
+                  color: Theme.of(context).colorScheme.onSurface,
                   size: 20,
                 ),
               ),
@@ -204,8 +296,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     );
   }
 
-  Widget _buildImageCarousel() {
-    final images = widget.product!.images ?? [];
+  Widget _buildImageCarousel({Product? product}) {
+    final images = product?.images ?? [];
 
     return AnimatedBuilder(
       animation: _scaleAnimation,
@@ -245,11 +337,34 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                           ),
                         ),
                         child: images.isNotEmpty
-                            ? Hero(
-                                tag: 'product_${widget.product!.sId}_$index',
-                                child: CustomNetworkImage(
-                                  imageUrl: images[index].url ?? '',
-                                  fit: BoxFit.contain,
+                            ? GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    PageRouteBuilder(
+                                      opaque: false,
+                                      pageBuilder: (context, animation, _) {
+                                        return FadeTransition(
+                                          opacity: animation,
+                                          child: FullscreenImageViewer(
+                                            imageUrls: images
+                                                .map((e) => e.url ?? '')
+                                                .toList(),
+                                            initialIndex: index,
+                                            heroTagPrefix:
+                                                'product_${product?.sId}',
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  );
+                                },
+                                child: Hero(
+                                  tag: 'product_${product?.sId}_$index',
+                                  child: ImageLoader(
+                                    imageUrl: images[index].url ?? '',
+                                    fit: BoxFit.contain,
+                                    semanticLabel: 'Product image ${index + 1}',
+                                  ),
                                 ),
                               )
                             : const Icon(
@@ -346,7 +461,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     );
   }
 
-  Widget _buildProductInfo() {
+  Widget _buildProductInfo({Product? product}) {
+    final colorScheme = Theme.of(context).colorScheme;
     return SlideTransition(
       position: _slideAnimation,
       child: FadeTransition(
@@ -354,7 +470,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
         child: Container(
           margin: const EdgeInsets.only(top: 10),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: colorScheme.surface,
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(30),
               topRight: Radius.circular(30),
@@ -376,7 +492,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                   ),
                 ),
               ),
-
               Padding(
                 padding: const EdgeInsets.all(24),
                 child: Column(
@@ -384,50 +499,148 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                   children: [
                     // Product name and category
                     Text(
-                      widget.product!.name ?? 'Product Name',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                        height: 1.2,
-                      ),
+                      product?.name ?? 'Product Name',
+                      style: AccessibilityHelper.accessibleTextStyle(context,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onSurface),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      widget.product!.proCategoryId?.name ?? 'Category',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      product?.proCategoryId?.name ?? 'Category',
+                      style: AccessibilityHelper.accessibleTextStyle(context,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: colorScheme.onSurface.withOpacity(0.7)),
                     ),
-
                     const SizedBox(height: 20),
-
-                    // Price section
-                    _buildPriceSection(),
-
+                    _buildPriceSection(product: product),
                     const SizedBox(height: 24),
-
                     // Stock status
                     _buildStockStatus(),
-
                     const SizedBox(height: 24),
-
                     // Variants if available
-                    if (widget.product!.proVariantId?.isNotEmpty == true)
+                    if (product?.proVariantId?.isNotEmpty == true)
                       _buildVariantSection(),
-
                     const SizedBox(height: 24),
-
                     // Description
                     _buildDescriptionSection(),
-
                     const SizedBox(height: 24),
-
                     // Features section
                     _buildFeaturesSection(),
-
+                    const SizedBox(height: 32),
+                    // Elegant section divider
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 16),
+                        child: Column(
+                          children: [
+                            Container(
+                              width: 60,
+                              height: 3,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    colorScheme.primary.withOpacity(0.8),
+                                    colorScheme.primary.withOpacity(0.3),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Customer Reviews',
+                              style: AccessibilityHelper.accessibleTextStyle(
+                                  context,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color:
+                                      colorScheme.onSurface.withOpacity(0.7)),
+                              // color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                              // letterSpacing: 0.5,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Modern Review Carousel
+                    if (_carouselReviews.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: ModernReviewCarousel(reviews: _carouselReviews),
+                      ),
+                    // Show All Reviews Button
+                    Center(
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.reviews),
+                        label: const Text('Show All Reviews'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 32, vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            barrierDismissible: true,
+                            builder: (context) => Dialog(
+                              insetPadding: EdgeInsets.zero,
+                              backgroundColor: Colors.transparent,
+                              child: Container(
+                                width: MediaQuery.of(context).size.width,
+                                height: MediaQuery.of(context).size.height,
+                                color: colorScheme.background,
+                                child: AnimatedAdvancedReviewsSection(
+                                  productId: product?.sId ?? '',
+                                  userId: _getCurrentUserId(),
+                                  canAddReview: _getCurrentUserId() != null &&
+                                      _getCurrentUserToken() != null,
+                                  onReviewAdded: () {
+                                    setState(() {});
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.check_circle,
+                                              color: Colors.green,
+                                              size: 20,
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Text(
+                                              'Review added successfully!',
+                                              style: AccessibilityHelper
+                                                  .accessibleTextStyle(context,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      color: colorScheme
+                                                          .onInverseSurface),
+                                            ),
+                                          ],
+                                        ),
+                                        backgroundColor:
+                                            colorScheme.inverseSurface,
+                                        behavior: SnackBarBehavior.floating,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                        margin: const EdgeInsets.all(16),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                     const SizedBox(height: 100), // Space for bottom actions
                   ],
                 ),
@@ -439,16 +652,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     );
   }
 
-  Widget _buildPriceSection() {
-    final hasOffer = widget.product!.offerPrice != null &&
-        widget.product!.offerPrice != widget.product!.price;
+  Widget _buildPriceSection({Product? product}) {
+    final hasOffer =
+        product?.offerPrice != null && product?.offerPrice != product?.price;
 
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: AppColors.primaryGradient.scale(0.1),
+        color: colorScheme.surface,
         borderRadius: AppRadius.xlRadius,
-        border: Border.all(color: AppColors.secondary.withOpacity(0.2)),
+        border: Border.all(color: colorScheme.primary.withOpacity(0.2)),
         boxShadow: AppShadows.small,
       ),
       child: Row(
@@ -460,7 +674,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                 Text(
                   'Price',
                   style: TextStyle(
-                    color: Colors.grey[600],
+                    color: colorScheme.onSurface.withOpacity(0.7),
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
@@ -470,25 +684,24 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                   children: [
                     Text(
                       CurrencyHelper.formatCurrencyCompact(
-                        hasOffer
-                            ? widget.product!.offerPrice!
-                            : widget.product!.price!,
+                        hasOffer == true
+                            ? product!.offerPrice!
+                            : product!.price!,
                       ),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF2D3436),
+                        color: colorScheme.primary,
                       ),
                     ),
-                    if (hasOffer) ...[
+                    if (hasOffer == true) ...[
                       const SizedBox(width: 12),
                       Text(
-                        CurrencyHelper.formatCurrencyCompact(
-                            widget.product!.price!),
+                        CurrencyHelper.formatCurrencyCompact(product.price!),
                         style: TextStyle(
                           fontSize: 18,
                           decoration: TextDecoration.lineThrough,
-                          color: Colors.grey[500],
+                          color: colorScheme.onSurface.withOpacity(0.5),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -498,7 +711,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
               ],
             ),
           ),
-          if (hasOffer)
+          if (hasOffer == true)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
@@ -506,7 +719,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                 borderRadius: AppRadius.mdRadius,
               ),
               child: Text(
-                'SAVE ${CurrencyHelper.formatCurrencyCompact(widget.product!.price! - widget.product!.offerPrice!)}',
+                'SAVE ${CurrencyHelper.formatCurrencyCompact(product.price! - product.offerPrice!)}',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 12,
@@ -573,10 +786,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
       children: [
         Text(
           'Available ${widget.product!.proVariantTypeId?.type ?? 'Options'}',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF2D3436),
+            color: Theme.of(context).colorScheme.primary,
           ),
         ),
         const SizedBox(height: 12),
@@ -599,11 +812,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                         horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
                       gradient: isSelected ? AppColors.primaryGradient : null,
-                      color: isSelected ? null : AppColors.surfaceContainer,
+                      color: isSelected
+                          ? null
+                          : Theme.of(context).colorScheme.surface,
                       borderRadius: AppRadius.mdRadius,
                       border: Border.all(
-                        color:
-                            isSelected ? Colors.transparent : AppColors.border,
+                        color: isSelected
+                            ? Colors.transparent
+                            : Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withOpacity(0.3),
                       ),
                       boxShadow: isSelected ? AppShadows.medium : null,
                     ),
@@ -611,8 +830,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                       variant,
                       style: TextStyle(
                         color: isSelected
-                            ? AppColors.textOnPrimary
-                            : AppColors.textPrimary,
+                            ? Colors.white
+                            : Theme.of(context).colorScheme.onSurface,
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
@@ -631,12 +850,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Description',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF2D3436),
+            color: Theme.of(context).colorScheme.primary,
           ),
         ),
         const SizedBox(height: 12),
@@ -644,7 +863,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           firstChild: Text(
             widget.product!.description ?? 'No description available.',
             style: TextStyle(
-              color: Colors.grey[700],
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
               fontSize: 15,
               height: 1.6,
             ),
@@ -654,7 +873,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           secondChild: Text(
             widget.product!.description ?? 'No description available.',
             style: TextStyle(
-              color: Colors.grey[700],
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
               fontSize: 15,
               height: 1.6,
             ),
@@ -673,8 +892,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           },
           child: Text(
             _isExpanded ? 'Show Less' : 'Read More',
-            style: const TextStyle(
-              color: Color(0xFF667eea),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.primary,
               fontWeight: FontWeight.w600,
               fontSize: 14,
             ),
@@ -706,12 +925,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Features',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF2D3436),
+            color: Theme.of(context).colorScheme.primary,
           ),
         ),
         const SizedBox(height: 16),
@@ -720,9 +939,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.surfaceContainer,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: AppRadius.mdRadius,
-              border: Border.all(color: AppColors.border),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+              ),
             ),
             child: Row(
               children: [
@@ -748,14 +969,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
-                          color: AppColors.textPrimary,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         feature['subtitle'] as String,
                         style: TextStyle(
-                          color: AppColors.textSecondary,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.7),
                           fontSize: 12,
                         ),
                       ),
@@ -771,10 +995,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
   }
 
   Widget _buildBottomActions() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -794,7 +1019,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
               // Quantity selector
               Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey[300]!),
+                  border: Border.all(color: Theme.of(context).dividerColor),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(

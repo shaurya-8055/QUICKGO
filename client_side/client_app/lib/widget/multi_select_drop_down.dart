@@ -1,8 +1,6 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 
-import '../utility/app_color.dart';
-
 class MultiSelectDropDown<T> extends StatelessWidget {
   final String? hintText;
   final List<T> items;
@@ -24,9 +22,14 @@ class MultiSelectDropDown<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Card(
       margin: dense ? EdgeInsets.zero : null,
       elevation: dense ? 0 : null,
+      color: isDark ? colorScheme.surface : null,
       child: Center(
         child: DropdownButtonHideUnderline(
           child: DropdownButton2<T>(
@@ -35,7 +38,8 @@ class MultiSelectDropDown<T> extends StatelessWidget {
               '$hintText',
               style: TextStyle(
                 fontSize: dense ? 13 : 14,
-                color: Theme.of(context).hintColor,
+                color: colorScheme.onSurface.withOpacity(0.6),
+                fontWeight: FontWeight.w500,
               ),
             ),
             items: items.map((item) {
@@ -61,15 +65,23 @@ class MultiSelectDropDown<T> extends StatelessWidget {
                             : const EdgeInsets.symmetric(horizontal: 16.0),
                         child: Row(
                           children: [
-                            if (isSelected)
-                              const Icon(Icons.check_box_outlined)
-                            else
-                              const Icon(Icons.check_box_outline_blank),
+                            Icon(
+                              isSelected
+                                  ? Icons.check_box_outlined
+                                  : Icons.check_box_outline_blank,
+                              color: isSelected
+                                  ? colorScheme.primary
+                                  : colorScheme.onSurface.withOpacity(0.6),
+                            ),
                             SizedBox(width: dense ? 12 : 16),
                             Expanded(
                               child: Text(
                                 displayItem(item),
-                                style: TextStyle(fontSize: dense ? 13 : 14),
+                                style: TextStyle(
+                                  fontSize: dense ? 13 : 14,
+                                  color: colorScheme.onSurface,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ),
                           ],
@@ -91,8 +103,11 @@ class MultiSelectDropDown<T> extends StatelessWidget {
                     child: Text(
                       selectedItems.map(displayItem).join(', '),
                       style: TextStyle(
-                          fontSize: dense ? 13 : 14,
-                          overflow: TextOverflow.ellipsis),
+                        fontSize: dense ? 13 : 14,
+                        overflow: TextOverflow.ellipsis,
+                        color: colorScheme.onSurface,
+                        fontWeight: FontWeight.w500,
+                      ),
                       maxLines: 1,
                     ),
                   );
@@ -105,14 +120,33 @@ class MultiSelectDropDown<T> extends StatelessWidget {
                   : const EdgeInsets.only(left: 16, right: 8),
               height: dense ? 40 : 50,
               decoration: BoxDecoration(
-                color: AppColor.lightGrey,
-                border: Border.all(color: Colors.grey),
+                color: isDark
+                    ? colorScheme.surface.withOpacity(0.8)
+                    : colorScheme.surfaceVariant,
+                border: Border.all(
+                  color: colorScheme.outline.withOpacity(0.5),
+                ),
                 borderRadius: BorderRadius.circular(8.0),
               ),
             ),
             menuItemStyleData: MenuItemStyleData(
               height: dense ? 36 : 40,
               padding: EdgeInsets.zero,
+            ),
+            dropdownStyleData: DropdownStyleData(
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                borderRadius: BorderRadius.circular(8.0),
+                border: Border.all(
+                  color: colorScheme.outline.withOpacity(0.5),
+                ),
+              ),
+            ),
+            iconStyleData: IconStyleData(
+              icon: Icon(
+                Icons.keyboard_arrow_down,
+                color: colorScheme.onSurface.withOpacity(0.7),
+              ),
             ),
           ),
         ),

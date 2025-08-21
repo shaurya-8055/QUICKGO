@@ -52,15 +52,15 @@ class _PosterSectionState extends State<PosterSection>
   }
 
   void _startAutoSlide() {
-    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 4), (timer) {
       final dataProvider = Provider.of<DataProvider>(context, listen: false);
       if (dataProvider.posters.isNotEmpty) {
         _currentPage = (_currentPage + 1) % dataProvider.posters.length;
         if (_pageController.hasClients) {
           _pageController.animateToPage(
             _currentPage,
-            duration: const Duration(milliseconds: 800),
-            curve: Curves.easeInOutCubic,
+            duration: const Duration(milliseconds: 1000),
+            curve: Curves.easeInOutQuart,
           );
         }
         // Preload the next image to ensure smooth transition
@@ -134,257 +134,410 @@ class _PosterSectionState extends State<PosterSection>
           return AnimatedBuilder(
             animation: _fadeAnimation,
             builder: (context, child) {
-              return FadeTransition(
-                opacity: _fadeAnimation,
-                child: PageView.builder(
-                  controller: _pageController,
-                  allowImplicitScrolling: true,
-                  onPageChanged: (index) {
-                    setState(() {
-                      _currentPage = index;
-                    });
-                    // Preload the next one
-                    _precachePoster(index + 1);
-                  },
-                  itemCount: dataProvider.posters.length,
-                  itemBuilder: (context, index) {
-                    // Use firstWhereOrNull to avoid the "Bad state: No element" error
-                    final product =
-                        context.dataProvider.allProducts.firstWhereOrNull(
-                      (product) =>
-                          product.sId == dataProvider.posters[index].productId,
-                    );
+              return Stack(
+                children: [
+                  // Main poster PageView
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: PageView.builder(
+                      controller: _pageController,
+                      allowImplicitScrolling: true,
+                      onPageChanged: (index) {
+                        setState(() {
+                          _currentPage = index;
+                        });
+                        // Preload the next one
+                        _precachePoster(index + 1);
+                      },
+                      itemCount: dataProvider.posters.length,
+                      itemBuilder: (context, index) {
+                        // Use firstWhereOrNull to avoid the "Bad state: No element" error
+                        final product =
+                            context.dataProvider.allProducts.firstWhereOrNull(
+                          (product) =>
+                              product.sId ==
+                              dataProvider.posters[index].productId,
+                        );
 
-                    // Removed verbose debug prints
-
-                    // Show poster regardless of whether product exists or not
-                    // Parallax disabled to ensure full image visibility
-
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 10),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: _getPosterGradient(index),
-                        ),
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color:
-                                _getPosterGradient(index)[0].withOpacity(0.3),
-                            blurRadius: 15,
-                            offset: const Offset(0, 8),
-                            spreadRadius: 1,
-                          ),
-                        ],
-                      ),
-                      child: Stack(
-                        children: [
-                          // Background image with parallax
-                          Positioned.fill(
-                            child: Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Hero(
-                                tag:
-                                    'poster_${dataProvider.posters[index].imageUrl}',
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(15),
-                                  child: Stack(
-                                    fit: StackFit.expand,
-                                    children: [
-                                      // Smooth blurred background image to blend with card gradient
-                                      AnimatedSwitcher(
-                                        duration:
-                                            const Duration(milliseconds: 600),
-                                        switchInCurve: Curves.easeInOut,
-                                        switchOutCurve: Curves.easeInOut,
-                                        child: ImageFiltered(
-                                          key: ValueKey(
-                                              'bg_${dataProvider.posters[index].imageUrl}'),
-                                          imageFilter: ui.ImageFilter.blur(
-                                              sigmaX: 10, sigmaY: 10),
-                                          child: Image.network(
-                                            '${dataProvider.posters[index].imageUrl}',
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      ),
-
-                                      // Foreground contained image with smooth transition
-                                      Center(
-                                        child: AnimatedSwitcher(
-                                          duration:
-                                              const Duration(milliseconds: 600),
-                                          switchInCurve: Curves.easeInOut,
-                                          switchOutCurve: Curves.easeInOut,
-                                          child: Image.network(
-                                            '${dataProvider.posters[index].imageUrl}',
-                                            key: ValueKey(
-                                                'fg_${dataProvider.posters[index].imageUrl}'),
-                                            fit: BoxFit.contain,
-                                          ),
-                                        ),
-                                      ),
-                                      // Gradient overlay for readability
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            begin: Alignment.topCenter,
-                                            end: Alignment.bottomCenter,
-                                            colors: [
-                                              Colors.black.withOpacity(0.0),
-                                              Colors.black.withOpacity(0.25),
-                                              Colors.black.withOpacity(0.55),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
+                        return AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 10),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: _getPosterGradient(index),
                             ),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: _getPosterGradient(index)[0]
+                                    .withOpacity(0.3),
+                                blurRadius: 15,
+                                offset: const Offset(0, 8),
+                                spreadRadius: 1,
+                              ),
+                            ],
                           ),
-
-                          // Foreground content
-                          Positioned.fill(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 16),
-                              child: Row(
-                                children: [
-                                  // Text and CTA
-                                  Expanded(
-                                    flex: 45,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        AnimatedDefaultTextStyle(
-                                          duration:
-                                              const Duration(milliseconds: 500),
-                                          style: Theme.of(context)
-                                                  .textTheme
-                                                  .titleLarge
-                                                  ?.copyWith(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.w800,
-                                                    fontSize: 20,
-                                                    letterSpacing: 0.2,
-                                                  ) ??
-                                              const TextStyle(),
-                                          child: Text(
-                                            '${dataProvider.posters[index].posterName}',
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 10),
-                                        Material(
-                                          color: Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(25),
-                                          child: InkWell(
-                                            borderRadius:
-                                                BorderRadius.circular(25),
-                                            onTap: product != null
-                                                ? () {
-                                                    Navigator.push(
-                                                      context,
-                                                      PageRouteBuilder(
-                                                        pageBuilder: (context,
-                                                                animation,
-                                                                secondaryAnimation) =>
-                                                            ProductDetailScreen(
-                                                                product),
-                                                        transitionsBuilder:
-                                                            (context,
-                                                                animation,
-                                                                secondaryAnimation,
-                                                                child) {
-                                                          return SlideTransition(
-                                                            position: Tween<
-                                                                Offset>(
-                                                              begin:
-                                                                  const Offset(
-                                                                      1.0, 0.0),
-                                                              end: Offset.zero,
-                                                            ).animate(
-                                                                CurvedAnimation(
-                                                              parent: animation,
-                                                              curve: Curves
-                                                                  .easeInOutCubic,
-                                                            )),
-                                                            child:
-                                                                FadeTransition(
-                                                              opacity:
-                                                                  animation,
-                                                              child: child,
+                          child: Stack(
+                            children: [
+                              // Background image with parallax
+                              Positioned.fill(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Hero(
+                                    tag:
+                                        'poster_${dataProvider.posters[index].imageUrl}',
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(15),
+                                      child: Stack(
+                                        fit: StackFit.expand,
+                                        children: [
+                                          // Smooth blurred background image to blend with card gradient
+                                          AnimatedSwitcher(
+                                            duration: const Duration(
+                                                milliseconds: 800),
+                                            child: dataProvider.posters[index]
+                                                        .imageUrl?.isNotEmpty ==
+                                                    true
+                                                ? ImageFiltered(
+                                                    key: ValueKey(dataProvider
+                                                        .posters[index]
+                                                        .imageUrl),
+                                                    imageFilter:
+                                                        ui.ImageFilter.blur(
+                                                            sigmaX: 8,
+                                                            sigmaY: 8),
+                                                    child: Image.network(
+                                                      '${dataProvider.posters[index].imageUrl}',
+                                                      fit: BoxFit.cover,
+                                                      loadingBuilder: (context,
+                                                          child,
+                                                          loadingProgress) {
+                                                        if (loadingProgress ==
+                                                            null) return child;
+                                                        return Container(
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            gradient:
+                                                                LinearGradient(
+                                                              colors:
+                                                                  _getPosterGradient(
+                                                                      index),
                                                             ),
-                                                          );
-                                                        },
-                                                        transitionDuration:
-                                                            const Duration(
-                                                                milliseconds:
-                                                                    600),
-                                                      ),
-                                                    );
-                                                  }
-                                                : null,
-                                            child: Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 18,
-                                                      vertical: 10),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  if (product != null)
-                                                    Text(
-                                                      "Shop Now",
-                                                      style: TextStyle(
-                                                        color:
+                                                          ),
+                                                          child: const Center(
+                                                            child:
+                                                                CircularProgressIndicator(
+                                                              color: Colors
+                                                                  .white54,
+                                                              strokeWidth: 2,
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                      errorBuilder: (context,
+                                                          error, stackTrace) {
+                                                        return Container(
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            gradient:
+                                                                LinearGradient(
+                                                              colors:
+                                                                  _getPosterGradient(
+                                                                      index),
+                                                            ),
+                                                          ),
+                                                          child: const Center(
+                                                            child: Icon(
+                                                              Icons
+                                                                  .image_not_supported,
+                                                              color: Colors
+                                                                  .white54,
+                                                              size: 48,
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                    ),
+                                                  )
+                                                : Container(
+                                                    key: ValueKey(
+                                                        'empty_${index}'),
+                                                    decoration: BoxDecoration(
+                                                      gradient: LinearGradient(
+                                                        colors:
                                                             _getPosterGradient(
-                                                                index)[0],
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.w700,
+                                                                index),
                                                       ),
                                                     ),
-                                                  const SizedBox(width: 6),
-                                                  if (product != null)
-                                                    Icon(
-                                                      Icons
-                                                          .arrow_forward_ios_rounded,
-                                                      size: 14,
-                                                      color: _getPosterGradient(
-                                                          index)[0],
-                                                    ),
+                                                  ),
+                                          ),
+
+                                          // Sharp overlay for the actual crisp image
+                                          Positioned.fill(
+                                            child: AnimatedSwitcher(
+                                              duration: const Duration(
+                                                  milliseconds: 800),
+                                              child: dataProvider
+                                                          .posters[index]
+                                                          .imageUrl
+                                                          ?.isNotEmpty ==
+                                                      true
+                                                  ? Image.network(
+                                                      key: ValueKey(
+                                                          'sharp_${dataProvider.posters[index].imageUrl}'),
+                                                      '${dataProvider.posters[index].imageUrl}',
+                                                      fit: BoxFit.cover,
+                                                      loadingBuilder: (context,
+                                                          child,
+                                                          loadingProgress) {
+                                                        if (loadingProgress ==
+                                                            null) return child;
+                                                        return const SizedBox();
+                                                      },
+                                                      errorBuilder: (context,
+                                                          error, stackTrace) {
+                                                        return const SizedBox();
+                                                      },
+                                                    )
+                                                  : const SizedBox(),
+                                            ),
+                                          ),
+
+                                          // Dark overlay for text readability
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                begin: Alignment.topCenter,
+                                                end: Alignment.bottomCenter,
+                                                colors: [
+                                                  Colors.transparent,
+                                                  Colors.black.withOpacity(0.3),
+                                                  Colors.black.withOpacity(0.7),
                                                 ],
+                                                stops: const [0.0, 0.6, 1.0],
                                               ),
                                             ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   ),
-
-                                  // Spacer to let the image shine
-                                  const Expanded(flex: 55, child: SizedBox()),
-                                ],
+                                ),
                               ),
-                            ),
+
+                              // Enhanced CTA Button - Top Right
+                              Positioned(
+                                top: 20,
+                                right: 20,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.95),
+                                    borderRadius: BorderRadius.circular(25),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    borderRadius: BorderRadius.circular(25),
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(25),
+                                      onTap: product != null
+                                          ? () {
+                                              Navigator.push(
+                                                context,
+                                                PageRouteBuilder(
+                                                  pageBuilder: (context,
+                                                          animation,
+                                                          secondaryAnimation) =>
+                                                      ProductDetailScreen(
+                                                          product),
+                                                  transitionsBuilder: (context,
+                                                      animation,
+                                                      secondaryAnimation,
+                                                      child) {
+                                                    return SlideTransition(
+                                                      position: Tween<Offset>(
+                                                        begin: const Offset(
+                                                            1.0, 0.0),
+                                                        end: Offset.zero,
+                                                      ).animate(CurvedAnimation(
+                                                        parent: animation,
+                                                        curve: Curves
+                                                            .easeInOutCubic,
+                                                      )),
+                                                      child: FadeTransition(
+                                                        opacity: animation,
+                                                        child: child,
+                                                      ),
+                                                    );
+                                                  },
+                                                  transitionDuration:
+                                                      const Duration(
+                                                          milliseconds: 600),
+                                                ),
+                                              );
+                                            }
+                                          : null,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 14, vertical: 8),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            if (product != null) ...[
+                                              Icon(
+                                                Icons.shopping_bag_outlined,
+                                                size: 16,
+                                                color: _getPosterGradient(
+                                                    index)[0],
+                                              ),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                "Shop Now",
+                                                style: TextStyle(
+                                                  color: _getPosterGradient(
+                                                      index)[0],
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ] else ...[
+                                              Icon(
+                                                Icons.explore_outlined,
+                                                size: 16,
+                                                color: _getPosterGradient(
+                                                    index)[0],
+                                              ),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                "Explore",
+                                                style: TextStyle(
+                                                  color: _getPosterGradient(
+                                                      index)[0],
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ],
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              // Enhanced Text Content - Bottom Left
+                              Positioned(
+                                bottom: 20,
+                                left: 20,
+                                right: 100, // Give space for CTA button
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      '${dataProvider.posters[index].posterName}',
+                                      style: Theme.of(context)
+                                              .textTheme
+                                              .titleLarge
+                                              ?.copyWith(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 22,
+                                            letterSpacing: 0.3,
+                                            shadows: [
+                                              Shadow(
+                                                color: Colors.black
+                                                    .withOpacity(0.3),
+                                                offset: const Offset(0, 1),
+                                                blurRadius: 3,
+                                              ),
+                                            ],
+                                          ) ??
+                                          const TextStyle(),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    if (product != null) ...[
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        'Starting from \$${product.price?.toStringAsFixed(2) ?? '0.00'}',
+                                        style: TextStyle(
+                                          color: Colors.white.withOpacity(0.9),
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          shadows: [
+                                            Shadow(
+                                              color:
+                                                  Colors.black.withOpacity(0.3),
+                                              offset: const Offset(0, 1),
+                                              blurRadius: 2,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        );
+                      },
+                    ),
+                  ),
+
+                  // Enhanced Carousel Indicators
+                  if (dataProvider.posters.length > 1)
+                    Positioned(
+                      bottom: 25,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: dataProvider.posters
+                                .asMap()
+                                .entries
+                                .map((entry) {
+                              final isActive = entry.key == _currentPage;
+                              return AnimatedContainer(
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 3),
+                                height: 6,
+                                width: isActive ? 20 : 6,
+                                decoration: BoxDecoration(
+                                  color: isActive
+                                      ? Colors.white
+                                      : Colors.white.withOpacity(0.4),
+                                  borderRadius: BorderRadius.circular(3),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
                       ),
-                    );
-                  },
-                ),
+                    ),
+                ],
               );
             },
           );

@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../utility/theme_provider.dart';
 import '../../search_screen/advanced_search_screen.dart';
 import '../../../widget/modern_filter_bottom_sheet.dart';
 import '../../../core/data/data_provider.dart';
+import '../../../utility/theme_provider.dart';
 import '../../notifications_screen/notifications_screen.dart';
 import '../../notifications_screen/notifications_provider.dart';
 import '../../product_favorite_screen/favorite_screen.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
-  Size get preferredSize => const Size.fromHeight(110);
+  Size get preferredSize => const Size.fromHeight(80);
 
   const CustomAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 380;
+
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).appBarTheme.backgroundColor ??
@@ -33,13 +36,38 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          padding: EdgeInsets.symmetric(
+              horizontal: isSmallScreen ? 12 : 16, vertical: 12),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Removed left menu button; start with search for a cleaner top bar
+              // Logo
+              Container(
+                margin: const EdgeInsets.only(right: 12),
+                child: Image.asset(
+                  'assets/images/logo.png',
+                  height: 32,
+                  width: 32,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      height: 32,
+                      width: 32,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.shopping_bag,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    );
+                  },
+                ),
+              ),
 
-              // Enhanced Search Bar
+              // Compact Search Bar - optimized for multiple elements
               Expanded(
                 child: Container(
                   height: 44,
@@ -50,6 +78,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
                       color: Theme.of(context).dividerColor.withOpacity(0.12),
+                      width: 1,
                     ),
                   ),
                   child: Material(
@@ -70,16 +99,22 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                         child: Row(
                           children: [
                             Icon(
-                              Icons.search,
+                              Icons.search_rounded,
                               color: Theme.of(context).hintColor,
                               size: 20,
                             ),
                             const SizedBox(width: 8),
-                            Text(
-                              'Search products...',
-                              style: TextStyle(
-                                color: Theme.of(context).hintColor,
-                                fontSize: 14,
+                            Expanded(
+                              child: Text(
+                                isSmallScreen
+                                    ? 'Search...'
+                                    : 'Search products...',
+                                style: TextStyle(
+                                  color: Theme.of(context).hintColor,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
@@ -90,235 +125,256 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
               ),
 
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
 
-              // Filter Button (premium)
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF667eea), Color(0xFF764ba2)],
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF667eea).withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
+              // Filter Button
+              _buildActionButton(
+                context: context,
+                icon: Icons.tune_rounded,
+                hasGradient: true,
+                gradientColors: [
+                  const Color(0xFF667eea),
+                  const Color(0xFF764ba2)
+                ],
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => ModernFilterBottomSheet(
+                      onFiltersApplied: (filters) {
+                        final dataProvider = context.read<DataProvider>();
+                        dataProvider.applyFilters(
+                          categories: filters['categories'],
+                          brands: filters['brands'],
+                          minPrice: filters['priceRange']?.start,
+                          maxPrice: filters['priceRange']?.end,
+                          sortBy: filters['sortBy'],
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Filters applied!'),
+                            backgroundColor: Colors.green,
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
                     ),
-                  ],
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(14),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(14),
-                    onTap: () {
-                      // Open premium filter bottom sheet
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (context) => ModernFilterBottomSheet(
-                          onFiltersApplied: (filters) {
-                            print('🔥 FILTERS RECEIVED: $filters');
-                            final dataProvider = context.read<DataProvider>();
-
-                            // Apply filters
-                            dataProvider.applyFilters(
-                              categories: filters['categories'],
-                              brands: filters['brands'],
-                              minPrice: filters['priceRange']?.start,
-                              maxPrice: filters['priceRange']?.end,
-                              sortBy: filters['sortBy'],
-                            );
-
-                            print('🔥 FILTERS APPLIED');
-                            print(
-                                '🔥 Filtered products count: ${dataProvider.products.length}');
-
-                            // Show success message
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Filters applied successfully!'),
-                                backgroundColor: Colors.green,
-                                duration: Duration(seconds: 2),
-                              ),
-                            );
-                          },
-                        ),
-                      );
-                    },
-                    child: const Icon(
-                      Icons.tune_rounded,
-                      color: Colors.white,
-                      size: 22,
-                    ),
-                  ),
-                ),
+                  );
+                },
+                isSmall: isSmallScreen,
               ),
 
-              const SizedBox(width: 16),
+              const SizedBox(width: 8),
 
-              // Theme toggle button
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? const Color(0xFF171A20)
-                      : const Color(0xFFF8F9FA),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: Theme.of(context).dividerColor.withOpacity(0.12),
-                  ),
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(14),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(14),
-                    onTap: () => context.read<ThemeProvider>().toggleTheme(),
-                    child: Center(
-                      child: Icon(
-                        Theme.of(context).brightness == Brightness.dark
-                            ? Icons.dark_mode
-                            : Icons.light_mode,
-                        color: Theme.of(context).colorScheme.onSurface,
-                        size: 22,
-                      ),
-                    ),
-                  ),
-                ),
+              // Theme Toggle Button
+              _buildActionButton(
+                context: context,
+                icon: Theme.of(context).brightness == Brightness.dark
+                    ? Icons.light_mode_rounded
+                    : Icons.dark_mode_rounded,
+                onTap: () => context.read<ThemeProvider>().toggleTheme(),
+                isSmall: isSmallScreen,
               ),
 
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
 
               // Favorites Button
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? const Color(0xFF171A20)
-                      : const Color(0xFFF8F9FA),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: Theme.of(context).dividerColor.withOpacity(0.12),
-                  ),
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(14),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(14),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const FavoriteScreen(),
-                        ),
-                      );
-                    },
-                    child: const Center(
-                      child: Icon(
-                        Icons.favorite_rounded,
-                        color: Colors.pinkAccent,
-                        size: 22,
-                      ),
+              _buildActionButton(
+                context: context,
+                icon: Icons.favorite_rounded,
+                iconColor: const Color(0xFFE91E63),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const FavoriteScreen(),
                     ),
-                  ),
-                ),
+                  );
+                },
+                isSmall: isSmallScreen,
               ),
 
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
 
-              // Notification Bell with modern design
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? const Color(0xFF171A20)
-                      : const Color(0xFFF8F9FA),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: Theme.of(context).dividerColor.withOpacity(0.12),
-                  ),
+              // Notifications Button with Badge
+              _buildNotificationButton(context, isSmallScreen),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required BuildContext context,
+    required IconData icon,
+    required VoidCallback onTap,
+    Color? iconColor,
+    bool hasGradient = false,
+    List<Color>? gradientColors,
+    bool isSmall = false,
+  }) {
+    final size = isSmall ? 40.0 : 44.0;
+    final iconSize = isSmall ? 18.0 : 20.0;
+
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        gradient: hasGradient && gradientColors != null
+            ? LinearGradient(
+                colors: gradientColors,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
+        color: hasGradient
+            ? null
+            : (Theme.of(context).brightness == Brightness.dark
+                ? const Color(0xFF171A20)
+                : const Color(0xFFF8F9FA)),
+        borderRadius: BorderRadius.circular(14),
+        border: hasGradient
+            ? null
+            : Border.all(
+                color: Theme.of(context).dividerColor.withOpacity(0.12),
+                width: 1,
+              ),
+        boxShadow: hasGradient
+            ? [
+                BoxShadow(
+                  color: gradientColors![0].withOpacity(0.3),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
                 ),
-                child: Material(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(14),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(14),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        PageRouteBuilder(
-                          pageBuilder:
-                              (context, animation, secondaryAnimation) =>
-                                  const NotificationsScreen(),
-                          transitionsBuilder:
-                              (context, animation, secondaryAnimation, child) {
-                            return SlideTransition(
-                              position: Tween<Offset>(
-                                      begin: const Offset(0.0, 1.0),
-                                      end: Offset.zero)
-                                  .animate(
-                                CurvedAnimation(
-                                    parent: animation,
-                                    curve: Curves.easeInOutCubic),
-                              ),
-                              child: FadeTransition(
-                                  opacity: animation, child: child),
-                            );
-                          },
-                          transitionDuration: const Duration(milliseconds: 500),
-                        ),
-                      );
-                    },
-                    child: Stack(
-                      children: [
-                        Center(
-                          child: Icon(
-                            Icons.notifications_outlined,
-                            color: Theme.of(context).colorScheme.onSurface,
-                            size: 22,
-                          ),
-                        ),
-                        // Notification badge
-                        Positioned(
-                          top: 6,
-                          right: 6,
-                          child: Consumer<NotificationsProvider>(
-                            builder: (context, np, _) {
-                              final unread = np.unreadCount;
-                              if (unread <= 0) return const SizedBox.shrink();
-                              return Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 5, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.error,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                constraints: const BoxConstraints(minWidth: 16),
-                                child: Text(
-                                  unread > 9 ? '9+' : '$unread',
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w700,
-                                      height: 1.0),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
+              ]
+            : [
+                BoxShadow(
+                  color: Colors.black.withOpacity(
+                      Theme.of(context).brightness == Brightness.dark
+                          ? 0.3
+                          : 0.08),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: onTap,
+          child: Center(
+            child: Icon(
+              icon,
+              color: hasGradient
+                  ? Colors.white
+                  : (iconColor ?? Theme.of(context).iconTheme.color),
+              size: iconSize,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNotificationButton(BuildContext context, bool isSmall) {
+    final size = isSmall ? 40.0 : 44.0;
+    final iconSize = isSmall ? 18.0 : 20.0;
+
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF171A20)
+            : const Color(0xFFF8F9FA),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withOpacity(0.12),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(
+                Theme.of(context).brightness == Brightness.dark ? 0.3 : 0.08),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () {
+            Navigator.push(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    const NotificationsScreen(),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  return SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0.0, 1.0),
+                      end: Offset.zero,
+                    ).animate(
+                      CurvedAnimation(
+                        parent: animation,
+                        curve: Curves.easeInOutCubic,
+                      ),
                     ),
-                  ),
+                    child: FadeTransition(opacity: animation, child: child),
+                  );
+                },
+                transitionDuration: const Duration(milliseconds: 500),
+              ),
+            );
+          },
+          child: Stack(
+            children: [
+              Center(
+                child: Icon(
+                  Icons.notifications_rounded,
+                  color: Theme.of(context).iconTheme.color,
+                  size: iconSize,
+                ),
+              ),
+              // Notification badge
+              Positioned(
+                top: isSmall ? 6 : 8,
+                right: isSmall ? 6 : 8,
+                child: Consumer<NotificationsProvider>(
+                  builder: (context, np, _) {
+                    final unread = np.unreadCount;
+                    if (unread <= 0) return const SizedBox.shrink();
+                    return Container(
+                      padding: EdgeInsets.all(isSmall ? 2 : 3),
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Color(0xFFFF5722), Color(0xFFE64A19)],
+                        ),
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: BoxConstraints(
+                        minWidth: isSmall ? 16 : 18,
+                        minHeight: isSmall ? 16 : 18,
+                      ),
+                      child: Text(
+                        unread > 99 ? '99+' : unread.toString(),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: isSmall ? 9 : 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    );
+                  },
                 ),
               ),
             ],

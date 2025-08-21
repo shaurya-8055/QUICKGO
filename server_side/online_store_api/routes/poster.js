@@ -44,7 +44,8 @@ router.post('/', asyncHandler(async (req, res) => {
                 return res.json({ success: false, message: err });
             }
             const { posterName , productId } = req.body;
-            const base = process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get('host')}`;
+            // Always use production URL to prevent localhost URLs in database
+            const base = process.env.PUBLIC_BASE_URL || 'https://quickgo-tpum.onrender.com';
             let imageUrl = 'no_url';
             if (req.file) {
                 imageUrl = `${base}/image/poster/${req.file.filename}`;
@@ -96,7 +97,8 @@ router.put('/:id', asyncHandler(async (req, res) => {
 
 
             if (req.file) {
-                const base = process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get('host')}`;
+                // Always use production URL to prevent localhost URLs in database
+                const base = process.env.PUBLIC_BASE_URL || 'https://quickgo-tpum.onrender.com';
                 image = `${base}/image/poster/${req.file.filename}`;
             }
 

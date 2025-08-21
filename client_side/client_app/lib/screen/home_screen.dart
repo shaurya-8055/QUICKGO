@@ -381,25 +381,18 @@ class _NavItem extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 1),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 180),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
-              child: selected
-                  ? Text(
-                      label,
-                      key: ValueKey(label),
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: color,
-                        letterSpacing: 0.1,
-                        height: 1.0,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    )
-                  : const SizedBox(height: 0),
+            // Always show labels for better UX
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: selected ? 10 : 9,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                color: color,
+                letterSpacing: 0.1,
+                height: 1.0,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ],
         ),
@@ -419,6 +412,22 @@ class QuickActionFab extends StatefulWidget {
 class _QuickActionFabState extends State<QuickActionFab>
     with SingleTickerProviderStateMixin {
   double _scale = 1.0;
+  late AnimationController _rotationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _rotationController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _rotationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -429,39 +438,104 @@ class _QuickActionFabState extends State<QuickActionFab>
       child: AnimatedScale(
         duration: const Duration(milliseconds: 150),
         scale: _scale,
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF667eea), Color(0xFF764ba2)],
-            ),
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF667eea).withOpacity(0.35),
-                blurRadius: 14,
-                offset: const Offset(0, 6),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Enhanced FAB with rotating border
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF667eea).withOpacity(0.4),
+                    blurRadius: 16,
+                    offset: const Offset(0, 8),
+                  ),
+                  BoxShadow(
+                    color: const Color(0xFF667eea).withOpacity(0.2),
+                    blurRadius: 32,
+                    offset: const Offset(0, 16),
+                  ),
+                ],
               ),
-              BoxShadow(
-                color: const Color(0xFF667eea).withOpacity(0.2),
-                blurRadius: 24,
-                offset: const Offset(0, 12),
+              child: Stack(
+                children: [
+                  // Animated rotating ring
+                  Positioned.fill(
+                    child: AnimatedBuilder(
+                      animation: _rotationController,
+                      builder: (context, child) {
+                        return Transform.rotate(
+                          angle: _rotationController.value * 6.28, // 2π
+                          child: Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.3),
+                                width: 2,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  // Main FAB
+                  FloatingActionButton(
+                    elevation: 0,
+                    backgroundColor: Colors.transparent,
+                    shape: const CircleBorder(),
+                    heroTag: 'quickActionFab',
+                    onPressed: widget.onPressed,
+                    child: const Icon(
+                      Icons.qr_code_scanner_rounded,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: FloatingActionButton.small(
-            elevation: 0,
-            backgroundColor: Colors.transparent,
-            shape: const StadiumBorder(),
-            heroTag: 'homeCenterFab',
-            onPressed: widget.onPressed,
-            child: const Icon(
-              Icons.camera_alt_rounded,
-              color: Colors.white,
-              size: 22,
             ),
-          ),
+
+            const SizedBox(height: 6),
+
+            // Enhanced label with background
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.black.withOpacity(0.7)
+                    : Colors.white.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Theme.of(context).dividerColor.withOpacity(0.2),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Text(
+                '📸 Scan Product',
+                style: TextStyle(
+                  color:
+                      Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -4,6 +4,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const asyncHandler = require('express-async-handler');
 const dotenv = require('dotenv');
+const { seedTechnicians } = require('./util/seedTechnicians');
 dotenv.config();
 
 const app = express();
@@ -48,7 +49,11 @@ const URL = process.env.MONGO_URL;
 mongoose.connect(URL);
 const db = mongoose.connection;
 db.on('error', (error) => console.error(error));
-db.once('open', () => console.log('Connected to Database'));
+db.once('open', async () => {
+    console.log('Connected to Database');
+    // Seed technicians if none exist
+    await seedTechnicians();
+});
 
 // Routes
 app.use('/categories', require('./routes/category'));
@@ -66,6 +71,7 @@ app.use('/payment', require('./routes/payment'));
 app.use('/notification', require('./routes/notification'));
 app.use('/service-requests', require('./routes/serviceRequest'));
 app.use('/technicians', require('./routes/technician'));
+app.use('/reviews', require('./routes/review'));
 
 
 // Example route using asyncHandler directly in app.js

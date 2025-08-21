@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import '../../../utility/constants.dart';
 import '../../../utility/extensions.dart';
+import 'service_action_dialog.dart';
 
 class ServiceRequestListSection extends StatelessWidget {
   const ServiceRequestListSection({super.key});
@@ -87,50 +88,81 @@ class ServiceRequestListSection extends StatelessWidget {
                       children: [
                         IconButton(
                           tooltip: 'Approve',
-                          onPressed: () async {
-                            if (sr.sId == null) return;
-                            final (ok, _) = await context.serviceProvider
-                                .updateStatus(id: sr.sId!, status: 'approved');
-                            if (ok)
-                              context.dataProvider.getAllServiceRequests();
-                          },
+                          onPressed: sr.sId == null
+                              ? null
+                              : () async {
+                                  final result = await showDialog<bool>(
+                                    context: context,
+                                    builder: (context) => ServiceActionDialog(
+                                      serviceRequest: sr,
+                                      action: 'approve',
+                                    ),
+                                  );
+                                  if (result == true) {
+                                    context.dataProvider
+                                        .getAllServiceRequests();
+                                  }
+                                },
                           icon: const Icon(Icons.check_circle,
                               color: Colors.greenAccent),
                         ),
                         IconButton(
                           tooltip: 'In-Progress',
-                          onPressed: () async {
-                            if (sr.sId == null) return;
-                            final (ok, _) = await context.serviceProvider
-                                .updateStatus(
-                                    id: sr.sId!, status: 'in-progress');
-                            if (ok)
-                              context.dataProvider.getAllServiceRequests();
-                          },
+                          onPressed: sr.sId == null
+                              ? null
+                              : () async {
+                                  final result = await showDialog<bool>(
+                                    context: context,
+                                    builder: (context) => ServiceActionDialog(
+                                      serviceRequest: sr,
+                                      action: 'in-progress',
+                                    ),
+                                  );
+                                  if (result == true) {
+                                    context.dataProvider
+                                        .getAllServiceRequests();
+                                  }
+                                },
                           icon: const Icon(Icons.play_circle_fill,
                               color: Colors.amberAccent),
                         ),
                         IconButton(
                           tooltip: 'Completed',
-                          onPressed: () async {
-                            if (sr.sId == null) return;
-                            final (ok, _) = await context.serviceProvider
-                                .updateStatus(id: sr.sId!, status: 'completed');
-                            if (ok)
-                              context.dataProvider.getAllServiceRequests();
-                          },
+                          onPressed: sr.sId == null
+                              ? null
+                              : () async {
+                                  final result = await showDialog<bool>(
+                                    context: context,
+                                    builder: (context) => ServiceActionDialog(
+                                      serviceRequest: sr,
+                                      action: 'completed',
+                                    ),
+                                  );
+                                  if (result == true) {
+                                    context.dataProvider
+                                        .getAllServiceRequests();
+                                  }
+                                },
                           icon: const Icon(Icons.task_alt,
                               color: Colors.lightBlueAccent),
                         ),
                         IconButton(
                           tooltip: 'Cancel',
-                          onPressed: () async {
-                            if (sr.sId == null) return;
-                            final (ok, _) = await context.serviceProvider
-                                .updateStatus(id: sr.sId!, status: 'cancelled');
-                            if (ok)
-                              context.dataProvider.getAllServiceRequests();
-                          },
+                          onPressed: sr.sId == null
+                              ? null
+                              : () async {
+                                  final result = await showDialog<bool>(
+                                    context: context,
+                                    builder: (context) => ServiceActionDialog(
+                                      serviceRequest: sr,
+                                      action: 'cancel',
+                                    ),
+                                  );
+                                  if (result == true) {
+                                    context.dataProvider
+                                        .getAllServiceRequests();
+                                  }
+                                },
                           icon:
                               const Icon(Icons.cancel, color: Colors.redAccent),
                         ),
