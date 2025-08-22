@@ -300,6 +300,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                         return MasonryProductGridView(
                           items: dataProvider.products,
                           padding: EdgeInsets.zero,
+                          loading: dataProvider.loadingProducts,
                         );
                       },
                     ),

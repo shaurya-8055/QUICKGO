@@ -29,68 +29,92 @@ class _HomeScreenState extends State<HomeScreen> {
   int newIndex = 0;
   bool _showBottomBar = true;
 
+  // Removed: _setBottomBarVisible (now handled in _HomeScreenScaffold)
+
+  @override
+  Widget build(BuildContext context) {
+    return const PageWrapper(
+      child: _HomeScreenScaffold(),
+    );
+  }
+}
+
+class _HomeScreenScaffold extends StatefulWidget {
+  const _HomeScreenScaffold({Key? key}) : super(key: key);
+
+  @override
+  State<_HomeScreenScaffold> createState() => _HomeScreenScaffoldState();
+}
+
+class _HomeScreenScaffoldState extends State<_HomeScreenScaffold> {
+  // Splash/global loader removed; shimmer will handle loading in product list
+  int newIndex = 0;
+  bool _showBottomBar = true;
+
   void _setBottomBarVisible(bool value) {
     if (_showBottomBar == value) return;
     setState(() => _showBottomBar = value);
   }
 
+  // Removed: _openScanList (now handled in _HomeScreenScaffold)
+
+  // Removed: _screenForIndex (now handled in _HomeScreenScaffold)
+
   @override
   Widget build(BuildContext context) {
-    return PageWrapper(
-      child: Scaffold(
-        // Premium bottom bar with center FAB for quick actions
-        bottomNavigationBar: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 220),
-          switchInCurve: Curves.easeOut,
-          switchOutCurve: Curves.easeIn,
-          transitionBuilder: (child, animation) {
-            final slide = Tween<Offset>(
-              begin: const Offset(0, 1),
-              end: Offset.zero,
-            ).animate(animation);
-            return SlideTransition(
-              position: slide,
-              child: FadeTransition(opacity: animation, child: child),
-            );
-          },
-          child: _showBottomBar
-              ? TopTierBottomBar(
-                  key: const ValueKey('visible-bar'),
-                  index: newIndex,
-                  onChanged: (i) => setState(() => newIndex = i),
-                )
-              : const SizedBox.shrink(key: ValueKey('hidden-bar')),
-        ),
-        floatingActionButton: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 220),
-          switchInCurve: Curves.easeOutBack,
-          switchOutCurve: Curves.easeInBack,
-          transitionBuilder: (child, animation) {
-            return ScaleTransition(scale: animation, child: child);
-          },
-          child: _showBottomBar
-              ? QuickActionFab(
-                  key: const ValueKey('visible-fab'),
-                  onPressed: _openScanList,
-                )
-              : const SizedBox.shrink(key: ValueKey('hidden-fab')),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        body: PageTransitionSwitcher(
-          duration: const Duration(seconds: 1),
-          transitionBuilder: (
-            Widget child,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-          ) {
-            return FadeThroughTransition(
-              animation: animation,
-              secondaryAnimation: secondaryAnimation,
-              child: child,
-            );
-          },
-          child: _screenForIndex(newIndex),
-        ),
+    return Scaffold(
+      key: const ValueKey('main-content'),
+      bottomNavigationBar: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 140),
+        switchInCurve: Curves.easeOut,
+        switchOutCurve: Curves.easeIn,
+        transitionBuilder: (child, animation) {
+          final slide = Tween<Offset>(
+            begin: const Offset(0, 1),
+            end: Offset.zero,
+          ).animate(animation);
+          return SlideTransition(
+            position: slide,
+            child: FadeTransition(opacity: animation, child: child),
+          );
+        },
+        child: _showBottomBar
+            ? TopTierBottomBar(
+                key: const ValueKey('visible-bar'),
+                index: newIndex,
+                onChanged: (i) => setState(() => newIndex = i),
+              )
+            : const SizedBox.shrink(key: ValueKey('hidden-bar')),
+      ),
+      floatingActionButton: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 140),
+        switchInCurve: Curves.easeOutBack,
+        switchOutCurve: Curves.easeInBack,
+        transitionBuilder: (child, animation) {
+          return ScaleTransition(scale: animation, child: child);
+        },
+        child: _showBottomBar
+            ? QuickActionFab(
+                key: const ValueKey('visible-fab'),
+                onPressed: _openScanList,
+              )
+            : const SizedBox.shrink(key: ValueKey('hidden-fab')),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      body: PageTransitionSwitcher(
+        duration: const Duration(milliseconds: 350),
+        transitionBuilder: (
+          Widget child,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+        ) {
+          return FadeThroughTransition(
+            animation: animation,
+            secondaryAnimation: secondaryAnimation,
+            child: child,
+          );
+        },
+        child: _screenForIndex(newIndex),
       ),
     );
   }
@@ -130,14 +154,10 @@ class TopTierBottomBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final cartCount = context.watch<CartProvider>().myCartItems.length;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final surfaceColor = isDark
-        ? const Color(0xFF111318).withOpacity(0.96)
-        : Colors.white.withOpacity(0.95);
+    // Lighter, non-blurred bar for performance
+    final surfaceColor = isDark ? const Color(0xFF181A20) : Colors.white;
     final barShadow =
-        isDark ? Colors.black.withOpacity(0.6) : Colors.black.withOpacity(0.1);
-    final accentShadow = isDark
-        ? const Color(0xFF667eea).withOpacity(0.05)
-        : const Color(0xFF667eea).withOpacity(0.1);
+        isDark ? Colors.black.withOpacity(0.3) : Colors.black.withOpacity(0.06);
 
     return ClipRRect(
       borderRadius: const BorderRadius.only(
@@ -149,95 +169,81 @@ class TopTierBottomBar extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color: barShadow,
-              blurRadius: 20,
-              offset: const Offset(0, -5),
-            ),
-            BoxShadow(
-              color: accentShadow,
-              blurRadius: 30,
-              offset: const Offset(0, -10),
+              blurRadius: 12,
+              offset: const Offset(0, -3),
             ),
           ],
         ),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-          child: SafeArea(
-            top: false,
-            child: MediaQuery(
-              // Prevent large accessibility text from causing overflow inside the bar
-              data: MediaQuery.of(context).copyWith(
-                // Keep labels compact so the bar never overflows
-                textScaleFactor:
-                    MediaQuery.of(context).textScaleFactor.clamp(0.85, 1.0),
-              ),
-              child: BottomAppBar(
-                color: surfaceColor,
-                elevation: 0,
-                // Give a touch more vertical room to avoid any debug overflows
-                height: 64,
-                shape: const AutomaticNotchedShape(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(28),
-                      topRight: Radius.circular(28),
-                    ),
+        child: SafeArea(
+          top: false,
+          child: MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaleFactor:
+                  MediaQuery.of(context).textScaleFactor.clamp(0.85, 1.0),
+            ),
+            child: BottomAppBar(
+              color: surfaceColor,
+              elevation: 0,
+              height: 64,
+              shape: const AutomaticNotchedShape(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(28),
+                    topRight: Radius.circular(28),
                   ),
-                  StadiumBorder(),
                 ),
-                child: Container(
-                  // Extra bottom padding to account for device insets and
-                  // ensure content never clips.
-                  padding: const EdgeInsets.only(left: 8, right: 8, bottom: 0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      _NavItem(
-                        icon: Icons.home_rounded,
-                        label: 'Home',
-                        selected: index == 0,
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          onChanged(0);
-                        },
+                StadiumBorder(),
+              ),
+              child: Container(
+                padding: const EdgeInsets.only(left: 8, right: 8, bottom: 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _NavItem(
+                      icon: Icons.home_rounded,
+                      label: 'Home',
+                      selected: index == 0,
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        onChanged(0);
+                      },
+                    ),
+                    _NavItem(
+                      icon: Icons.home_repair_service_rounded,
+                      label: 'Services',
+                      selected: index == 1,
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        onChanged(1);
+                      },
+                    ),
+                    const SizedBox(width: 40),
+                    _NavItem(
+                      customIcon: BadgeIcon(
+                        icon: index == 2
+                            ? Icons.shopping_bag
+                            : Icons.shopping_bag_outlined,
+                        filled: index == 2,
+                        count: cartCount,
                       ),
-                      _NavItem(
-                        icon: Icons.home_repair_service_rounded,
-                        label: 'Services',
-                        selected: index == 1,
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          onChanged(1);
-                        },
-                      ),
-                      const SizedBox(
-                          width: 40), // Reduced space for smaller FAB notch
-                      _NavItem(
-                        customIcon: BadgeIcon(
-                          icon: index == 2
-                              ? Icons.shopping_bag
-                              : Icons.shopping_bag_outlined,
-                          filled: index == 2,
-                          count: cartCount,
-                        ),
-                        label: 'Cart',
-                        selected: index == 2,
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          onChanged(2);
-                        },
-                      ),
-                      _NavItem(
-                        icon: Icons.person_rounded,
-                        label: 'Profile',
-                        selected: index == 3,
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          onChanged(3);
-                        },
-                      ),
-                    ],
-                  ),
+                      label: 'Cart',
+                      selected: index == 2,
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        onChanged(2);
+                      },
+                    ),
+                    _NavItem(
+                      icon: Icons.person_rounded,
+                      label: 'Profile',
+                      selected: index == 3,
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        onChanged(3);
+                      },
+                    ),
+                  ],
                 ),
               ),
             ),
