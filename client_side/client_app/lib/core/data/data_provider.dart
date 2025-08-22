@@ -16,6 +16,9 @@ import '../../utility/snack_bar_helper.dart';
 class DataProvider extends ChangeNotifier {
   HttpService service = HttpService();
 
+  bool _loadingProducts = false;
+  bool get loadingProducts => _loadingProducts;
+
   List<Category> _allCategories = [];
   List<Category> _filteredCategories = [];
   List<Category> get categories => _filteredCategories;
@@ -155,6 +158,8 @@ class DataProvider extends ChangeNotifier {
   }
 
   Future<void> getAllProduct({bool showSnack = false}) async {
+    _loadingProducts = true;
+    notifyListeners();
     try {
       Response response = await service.getItems(endpointUrl: 'products');
       ApiResponse<List<Product>> apiResponse =
@@ -165,9 +170,12 @@ class DataProvider extends ChangeNotifier {
       _allProducts = apiResponse.data ?? [];
       _filteredProducts =
           List.from(_allProducts); // Initialize with original data
+      _loadingProducts = false;
       notifyListeners();
       if (showSnack) SnackBarHelper.showSuccessSnackBar(apiResponse.message);
     } catch (e) {
+      _loadingProducts = false;
+      notifyListeners();
       if (showSnack) SnackBarHelper.showErrorSnackBar(e.toString());
     }
   }

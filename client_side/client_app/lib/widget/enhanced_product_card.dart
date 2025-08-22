@@ -9,34 +9,52 @@ import 'dart:ui';
 
 class EnhancedProductCard extends StatefulWidget {
   final Product product;
-  final VoidCallback? onTap;
-  final VoidCallback? onAddToCart;
-
-  const EnhancedProductCard({
-    Key? key,
-    required this.product,
-    this.onTap,
-    this.onAddToCart,
-  }) : super(key: key);
+  const EnhancedProductCard({Key? key, required this.product}) : super(key: key);
 
   @override
   State<EnhancedProductCard> createState() => _EnhancedProductCardState();
 }
 
-class _EnhancedProductCardState extends State<EnhancedProductCard>
-    with TickerProviderStateMixin {
-  late AnimationController _scaleController;
-  late AnimationController _favoriteController;
-  late AnimationController _cartController;
-  late AnimationController _shimmerController;
-  late AnimationController _rotationController;
+class _EnhancedProductCardState extends State<EnhancedProductCard> with SingleTickerProviderStateMixin {
+  // Animation controllers and variables
+  late final AnimationController _scaleController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 180),
+    lowerBound: 0.97,
+    upperBound: 1.0,
+    value: 1.0,
+  );
+  late final AnimationController _favoriteController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 300),
+    lowerBound: 0.85,
+    upperBound: 1.0,
+    value: 1.0,
+  );
+  late final AnimationController _cartController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 220),
+    lowerBound: 0.85,
+    upperBound: 1.0,
+    value: 1.0,
+  );
+  late final AnimationController _shimmerController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1200),
+  );
+  late final AnimationController _rotationController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 400),
+  );
 
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _favoriteAnimation;
-  late Animation<double> _cartAnimation;
-  late Animation<double> _shimmerAnimation;
-  late Animation<double> _rotationAnimation;
-  late Animation<Offset> _slideAnimation;
+  late final Animation<double> _scaleAnimation = Tween<double>(begin: 1.0, end: 0.97).animate(_scaleController);
+  late final Animation<double> _favoriteAnimation = Tween<double>(begin: 1.0, end: 0.85).animate(_favoriteController);
+  late final Animation<double> _cartAnimation = Tween<double>(begin: 1.0, end: 0.85).animate(_cartController);
+  late final Animation<double> _shimmerAnimation = Tween<double>(begin: -1.0, end: 1.0).animate(_shimmerController);
+  late final Animation<double> _rotationAnimation = Tween<double>(begin: 0.0, end: 2 * math.pi).animate(_rotationController);
+  late final Animation<Offset> _slideAnimation = Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero).animate(
+    CurvedAnimation(parent: _scaleController, curve: Curves.easeOutCubic),
+  );
 
   bool isHovered = false;
   bool showQuickActions = false;
@@ -44,80 +62,6 @@ class _EnhancedProductCardState extends State<EnhancedProductCard>
   @override
   void initState() {
     super.initState();
-
-    _scaleController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-
-    _favoriteController = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
-
-    _cartController = AnimationController(
-      duration: const Duration(milliseconds: 400),
-      vsync: this,
-    );
-
-    _shimmerController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: this,
-    );
-
-    _rotationController = AnimationController(
-      duration: const Duration(milliseconds: 500),
-      vsync: this,
-    );
-
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.08,
-    ).animate(CurvedAnimation(
-      parent: _scaleController,
-      curve: Curves.easeOutCubic,
-    ));
-
-    _favoriteAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.4,
-    ).animate(CurvedAnimation(
-      parent: _favoriteController,
-      curve: Curves.elasticOut,
-    ));
-
-    _cartAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.85,
-    ).animate(CurvedAnimation(
-      parent: _cartController,
-      curve: Curves.bounceOut,
-    ));
-
-    _shimmerAnimation = Tween<double>(
-      begin: -1.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _shimmerController,
-      curve: Curves.easeInOut,
-    ));
-
-    _rotationAnimation = Tween<double>(
-      begin: 0.0,
-      end: 2 * math.pi,
-    ).animate(CurvedAnimation(
-      parent: _rotationController,
-      curve: Curves.easeInOut,
-    ));
-
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 1),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _scaleController,
-      curve: Curves.easeOutCubic,
-    ));
-
     _shimmerController.repeat();
   }
 
@@ -135,7 +79,7 @@ class _EnhancedProductCardState extends State<EnhancedProductCard>
     _scaleController.forward().then((_) {
       _scaleController.reverse();
     });
-    widget.onTap?.call();
+    // If you want to handle tap, add a callback property to EnhancedProductCard.
   }
 
   void _onFavoriteTap() {
@@ -146,8 +90,7 @@ class _EnhancedProductCardState extends State<EnhancedProductCard>
       _rotationController.reverse();
     });
 
-    final favoriteProvider =
-        Provider.of<FavoriteProvider>(context, listen: false);
+    final favoriteProvider = Provider.of<FavoriteProvider>(context, listen: false);
     favoriteProvider.updateToFavoriteList(widget.product.sId ?? '');
   }
 
@@ -155,7 +98,7 @@ class _EnhancedProductCardState extends State<EnhancedProductCard>
     _cartController.forward().then((_) {
       _cartController.reverse();
     });
-    widget.onAddToCart?.call();
+    // If you want to handle add to cart, add a callback property to EnhancedProductCard.
   }
 
   Widget _buildShimmerOverlay() {
@@ -373,246 +316,193 @@ class _EnhancedProductCardState extends State<EnhancedProductCard>
                   child: Stack(
                     children: [
                       // Main content
+                      // Main content: image and details, always square image
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          // Product Image Section
-                          Expanded(
-                            flex: 3,
-                            child: Container(
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF8F9FA),
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(24),
-                                  topRight: Radius.circular(24),
-                                ),
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [
-                                    const Color(0xFFF8F9FA),
-                                    Colors.white.withOpacity(0.8),
-                                  ],
-                                ),
-                              ),
-                              child: Stack(
-                                children: [
-                                  // Product Image
-                                  Positioned.fill(
-                                    child: ClipRRect(
-                                      borderRadius: const BorderRadius.only(
-                                        topLeft: Radius.circular(24),
-                                        topRight: Radius.circular(24),
-                                      ),
-                                      child: widget
-                                                  .product.images?.isNotEmpty ==
-                                              true
-                                          ? Image.network(
-                                              widget.product.images!.first
-                                                      .url ??
-                                                  '',
-                                              fit: BoxFit.cover,
-                                              errorBuilder:
-                                                  (context, error, stackTrace) {
-                                                return Container(
-                                                  decoration: BoxDecoration(
-                                                    gradient: LinearGradient(
-                                                      colors: [
-                                                        Colors.grey.shade200,
-                                                        Colors.grey.shade100,
-                                                      ],
+                          // Product Image Section (responsive square, no gap)
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              final double size = constraints.maxWidth;
+                              return SizedBox(
+                                width: size,
+                                height: size,
+                                child: ClipRRect(
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(24),
+                                    topRight: Radius.circular(24),
+                                  ),
+                                  child: Stack(
+                                    children: [
+                                      // Product Image
+                                      Positioned.fill(
+                                        child: widget.product.images?.isNotEmpty == true
+                                            ? Image.network(
+                                                widget.product.images!.first.url ?? '',
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (context, error, stackTrace) {
+                                                  return Container(
+                                                    decoration: BoxDecoration(
+                                                      gradient: LinearGradient(
+                                                        colors: [
+                                                          Colors.grey.shade200,
+                                                          Colors.grey.shade100,
+                                                        ],
+                                                      ),
                                                     ),
+                                                    child: Icon(
+                                                      Icons.image_not_supported_outlined,
+                                                      size: 40,
+                                                      color: Colors.grey.shade400,
+                                                    ),
+                                                  );
+                                                },
+                                              )
+                                            : Container(
+                                                decoration: BoxDecoration(
+                                                  gradient: LinearGradient(
+                                                    colors: [
+                                                      Colors.grey.shade200,
+                                                      Colors.grey.shade100,
+                                                    ],
                                                   ),
-                                                  child: Icon(
-                                                    Icons
-                                                        .image_not_supported_outlined,
-                                                    size: 40,
-                                                    color: Colors.grey.shade400,
-                                                  ),
-                                                );
-                                              },
-                                            )
-                                          : Container(
-                                              decoration: BoxDecoration(
-                                                gradient: LinearGradient(
-                                                  colors: [
-                                                    Colors.grey.shade200,
-                                                    Colors.grey.shade100,
-                                                  ],
+                                                ),
+                                                child: Icon(
+                                                  Icons.image_outlined,
+                                                  size: 40,
+                                                  color: Colors.grey.shade400,
                                                 ),
                                               ),
-                                              child: Icon(
-                                                Icons.image_outlined,
-                                                size: 40,
-                                                color: Colors.grey.shade400,
-                                              ),
-                                            ),
-                                    ),
+                                      ),
+                                      if (isHovered) _buildShimmerOverlay(),
+                                    ],
                                   ),
-
-                                  // Shimmer overlay when hovered
-                                  if (isHovered) _buildShimmerOverlay(),
-                                ],
-                              ),
-                            ),
+                                ),
+                              );
+                            },
                           ),
 
-                          // Product Details Section
-                          Expanded(
-                            flex: 2,
-                            child: Container(
-                              height: 140, // Fixed height to prevent overflow
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  // Product Name
-                                  Flexible(
+                          // Product Details Section (no extra margin)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // Product Name
+                                Text(
+                                  widget.product.name ?? 'Unknown Product',
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF2D3436),
+                                    letterSpacing: -0.2,
+                                    height: 1.1,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 2),
+                                // Category
+                                if (widget.product.proCategoryId?.name != null)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 7,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF667eea).withOpacity(0.09),
+                                      borderRadius: BorderRadius.circular(7),
+                                    ),
                                     child: Text(
-                                      widget.product.name ?? 'Unknown Product',
+                                      widget.product.proCategoryId!.name!,
                                       style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xFF2D3436),
-                                        letterSpacing: -0.2,
-                                        height: 1.2,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFF667eea),
                                       ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-
-                                  const SizedBox(height: 6),
-
-                                  // Category
-                                  if (widget.product.proCategoryId?.name !=
-                                      null)
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFF667eea)
-                                            .withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Text(
-                                        widget.product.proCategoryId!.name!,
-                                        style: const TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w600,
-                                          color: Color(0xFF667eea),
-                                        ),
+                                const SizedBox(height: 2),
+                                // Price Section
+                                Row(
+                                  children: [
+                                    Text(
+                                      CurrencyHelper.formatCurrency(
+                                          widget.product.offerPrice ??
+                                              widget.product.price ??
+                                              0),
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w800,
+                                        color: Color(0xFF2D3436),
+                                        letterSpacing: -0.3,
                                       ),
                                     ),
-
-                                  const SizedBox(height: 6),
-
-                                  // Price Section
-                                  SizedBox(
-                                    height: 40, // Fixed height for price section
-                                    child: Row(
-                                      children: [
-                                      // Current Price
-                                      Text(
-                                        CurrencyHelper.formatCurrency(
-                                            widget.product.offerPrice ??
-                                                widget.product.price ??
-                                                0),
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w800,
-                                          color: Color(0xFF2D3436),
-                                          letterSpacing: -0.3,
-                                        ),
-                                      ),
-
-                                      // Original Price (if discounted)
-                                      if (widget.product.offerPrice != null &&
-                                          widget.product.price != null)
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(left: 8),
-                                          child: Text(
-                                            CurrencyHelper.formatCurrency(
-                                                widget.product.price!),
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w500,
-                                              color: Colors.grey.shade500,
-                                              decoration:
-                                                  TextDecoration.lineThrough,
-                                            ),
+                                    if (widget.product.offerPrice != null &&
+                                        widget.product.price != null)
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 6),
+                                        child: Text(
+                                          CurrencyHelper.formatCurrency(
+                                              widget.product.price!),
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.grey.shade500,
+                                            decoration:
+                                                TextDecoration.lineThrough,
                                           ),
                                         ),
-
-                                      const Spacer(),
-
-                                      // Stock indicator instead of rating
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 6,
-                                          vertical: 2,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: widget.product.quantity !=
-                                                      null &&
-                                                  widget.product.quantity! > 0
-                                              ? const Color(0xFF11998e)
-                                                  .withOpacity(0.1)
-                                              : const Color(0xFFFF6B6B)
-                                                  .withOpacity(0.1),
-                                          borderRadius:
-                                              BorderRadius.circular(6),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(
-                                              widget.product.quantity != null &&
-                                                      widget.product.quantity! >
-                                                          0
-                                                  ? Icons.check_circle_outline
-                                                  : Icons.remove_circle_outline,
-                                              size: 12,
-                                              color: widget.product.quantity !=
-                                                          null &&
-                                                      widget.product.quantity! >
-                                                          0
+                                      ),
+                                    const Spacer(),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 5,
+                                        vertical: 1.5,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color:
+                                            widget.product.quantity != null &&
+                                                    widget.product.quantity! > 0
+                                                ? const Color(0xFF11998e).withOpacity(0.09)
+                                                : const Color(0xFFFF6B6B).withOpacity(0.09),
+                                        borderRadius: BorderRadius.circular(5),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            widget.product.quantity != null &&
+                                                    widget.product.quantity! > 0
+                                                ? Icons.check_circle_outline
+                                                : Icons.remove_circle_outline,
+                                            size: 11,
+                                            color: widget.product.quantity != null && widget.product.quantity! > 0
+                                                ? const Color(0xFF11998e)
+                                                : const Color(0xFFFF6B6B),
+                                          ),
+                                          const SizedBox(width: 2),
+                                          Text(
+                                            widget.product.quantity != null &&
+                                                    widget.product.quantity! > 0
+                                                ? 'In Stock'
+                                                : 'Out of Stock',
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w600,
+                                              color: widget.product.quantity != null && widget.product.quantity! > 0
                                                   ? const Color(0xFF11998e)
                                                   : const Color(0xFFFF6B6B),
                                             ),
-                                            const SizedBox(width: 2),
-                                            Text(
-                                              widget.product.quantity != null &&
-                                                      widget.product.quantity! >
-                                                          0
-                                                  ? 'In Stock'
-                                                  : 'Out of Stock',
-                                              style: TextStyle(
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w600,
-                                                color: widget.product
-                                                                .quantity !=
-                                                            null &&
-                                                        widget.product
-                                                                .quantity! >
-                                                            0
-                                                    ? const Color(0xFF11998e)
-                                                    : const Color(0xFFFF6B6B),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                                          ),
+                                        ],
                                       ),
-                                      ],
                                     ),
-                                  ),
-                                ],
-                              ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
 

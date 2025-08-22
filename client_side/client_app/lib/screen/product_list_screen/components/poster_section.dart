@@ -80,12 +80,12 @@ class _PosterSectionState extends State<PosterSection>
 
   @override
   Widget build(BuildContext context) {
-    // Use dynamic height with aspect ratio, but cap the height for large screens
+    // Use dynamic height with increased aspect ratio and max height
     return LayoutBuilder(builder: (context, constraints) {
       double width = constraints.maxWidth;
-      double aspectRatio = 16 / 7;
+      double aspectRatio = 16 / 9; // Taller posters
       double calculatedHeight = width / aspectRatio;
-      double maxHeight = 220;
+      double maxHeight = 300; // Increased max height
       double height =
           calculatedHeight > maxHeight ? maxHeight : calculatedHeight;
       return SizedBox(
