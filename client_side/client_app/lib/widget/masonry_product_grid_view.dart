@@ -65,7 +65,7 @@ class MasonryProductGridView extends StatelessWidget {
       itemCount: items.length,
       itemBuilder: (context, index) {
         final product = items[index];
-        const double uniformHeight = 380;
+        const double uniformHeight = 280;
         return GestureDetector(
           onTap: () {
             Navigator.of(context).push(
@@ -103,7 +103,7 @@ class _ShimmerProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 380,
+      height: 280,
       decoration: BoxDecoration(
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(24),
@@ -113,7 +113,7 @@ class _ShimmerProductCard extends StatelessWidget {
         children: [
           // Image shimmer
           Container(
-            height: 180,
+            height: 160,
             width: double.infinity,
             decoration: BoxDecoration(
               color: Colors.grey[300],
