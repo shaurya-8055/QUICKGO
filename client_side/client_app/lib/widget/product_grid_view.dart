@@ -27,11 +27,11 @@ class ProductGridView extends StatelessWidget {
         shrinkWrap: true,
         physics: const ScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          // Taller cards for portrait images
-          childAspectRatio: 0.58,
+          // Standardized cards for consistent alignment
+          childAspectRatio: 0.85,
           crossAxisCount: 2,
-          mainAxisSpacing: 14,
-          crossAxisSpacing: 14,
+          mainAxisSpacing: 16,
+          crossAxisSpacing: 16,
         ),
         itemBuilder: (context, index) {
           Product product = items[index];

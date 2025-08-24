@@ -240,46 +240,50 @@ class _PremiumProductCardState extends State<PremiumProductCard>
                           width: isHovered ? 2 : 1,
                         ),
                       ),
-                      child: Stack(
-                        children: [
-                          // Shimmer effect
-                          if (isHovered) _buildShimmerOverlay(),
+                      child: Container(
+                        width: double.infinity,
+                        height: double.infinity,
+                        child: Stack(
+                          children: [
+                            // Shimmer effect
+                            if (isHovered) _buildShimmerOverlay(),
 
-                          // Main content
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Image section with glassmorphism
-                              Expanded(
-                                flex: widget.isGridView
-                                    ? 3
-                                    : 2, // increase space for image on grid cards
-                                child: _buildImageSection(),
-                              ),
+                            // Main content
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Image section with glassmorphism
+                                Expanded(
+                                  flex: widget.isGridView
+                                      ? 4
+                                      : 2, // balanced space for image on grid cards
+                                  child: _buildImageSection(),
+                                ),
 
-                              // Content section
-                              Expanded(
-                                flex: widget.isGridView
-                                    ? 2
-                                    : 3, // slightly reduce content area on grid
-                                child: _buildContentSection(),
-                              ),
-                            ],
-                          ),
+                                // Content section
+                                Expanded(
+                                  flex: widget.isGridView
+                                      ? 3
+                                      : 3, // balanced space for content area
+                                  child: _buildContentSection(),
+                                ),
+                              ],
+                            ),
 
-                          // Discount badge
-                          if (discountPercentage > 0) _buildDiscountBadge(),
+                            // Discount badge
+                            if (discountPercentage > 0) _buildDiscountBadge(),
 
-                          // Favorite button
-                          _buildFavoriteButton(),
+                            // Favorite button
+                            _buildFavoriteButton(),
 
-                          // Quick action overlay
-                          if (isHovered && !widget.isGridView)
-                            _buildQuickActions(),
+                            // Quick action overlay
+                            if (isHovered && !widget.isGridView)
+                              _buildQuickActions(),
 
-                          // Always-available add-to-cart for grid cards
-                          if (widget.isGridView) _buildGridAddButton(),
-                        ],
+                            // Always-available add-to-cart for grid cards
+                            if (widget.isGridView) _buildGridAddButton(),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -342,14 +346,14 @@ class _PremiumProductCardState extends State<PremiumProductCard>
         isDark ? AppColors.neutral80 : AppColors.textTertiary;
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+      margin: const EdgeInsets.fromLTRB(12, 6, 12, 6),
       decoration: BoxDecoration(
         gradient: imageBgGrad,
         borderRadius: AppRadius.lgRadius,
         boxShadow: AppShadows.small,
       ),
       child: AspectRatio(
-        aspectRatio: 3 / 4, // portrait aspect for product images
+        aspectRatio: 1 / 1, // square aspect for product images
         child: ClipRRect(
           borderRadius: AppRadius.lgRadius,
           child: widget.product.images?.isNotEmpty == true
@@ -386,44 +390,44 @@ class _PremiumProductCardState extends State<PremiumProductCard>
     final Color textTertiary =
         isDark ? AppColors.neutral70 : AppColors.textTertiary;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           // Product name
           Text(
             widget.product.name ?? 'Product Name',
             style: TextStyle(
-              fontSize: widget.isGridView ? 13.5 : 16,
+              fontSize: widget.isGridView ? 13.0 : 16,
               fontWeight: FontWeight.w600,
               color: textPrimary,
-              height: 1.3,
+              height: 1.1,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
 
           // Category
-          if (widget.product.proCategoryId?.name != null)
+          if (widget.product.proCategoryId?.name != null) ...[
+            const SizedBox(height: 3),
             Text(
               widget.product.proCategoryId!.name!,
               style: TextStyle(
-                fontSize: 11.5,
+                fontSize: 11.0,
                 color: textTertiary,
                 fontWeight: FontWeight.w500,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
+          ],
 
-          const SizedBox(height: 6),
+          const SizedBox(height: 3),
 
           // Price section
           _buildPriceSection(),
-
-          const SizedBox(height: 6),
 
           // Stock status
           _buildStockStatus(),
@@ -457,7 +461,7 @@ class _PremiumProductCardState extends State<PremiumProductCard>
                         : widget.product.price!,
                   ),
                   style: TextStyle(
-                    fontSize: widget.isGridView ? 15.0 : 18,
+                    fontSize: widget.isGridView ? 14.0 : 18,
                     fontWeight: FontWeight.bold,
                     color: textPrimary,
                   ),
@@ -466,7 +470,7 @@ class _PremiumProductCardState extends State<PremiumProductCard>
             ),
             if (hasOffer)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                 decoration: BoxDecoration(
                   gradient: AppColors.successGradient,
                   borderRadius: AppRadius.smRadius,
@@ -474,7 +478,7 @@ class _PremiumProductCardState extends State<PremiumProductCard>
                 child: Text(
                   '${discountPercentage.round()}% OFF',
                   style: TextStyle(
-                    fontSize: 10,
+                    fontSize: 9,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textOnPrimary,
                   ),
@@ -483,11 +487,11 @@ class _PremiumProductCardState extends State<PremiumProductCard>
           ],
         ),
         if (hasOffer) ...[
-          const SizedBox(height: 3),
+          const SizedBox(height: 1),
           Text(
             CurrencyHelper.formatCurrencyCompact(widget.product.price!),
             style: TextStyle(
-              fontSize: 11.5,
+              fontSize: 10,
               decoration: TextDecoration.lineThrough,
               color: textTertiary,
               fontWeight: FontWeight.w500,
@@ -504,18 +508,18 @@ class _PremiumProductCardState extends State<PremiumProductCard>
     return Row(
       children: [
         Container(
-          width: 8,
-          height: 8,
+          width: 6,
+          height: 6,
           decoration: BoxDecoration(
             color: inStock ? AppColors.success : AppColors.error,
             shape: BoxShape.circle,
           ),
         ),
-        const SizedBox(width: 6),
+        const SizedBox(width: 4),
         Text(
           inStock ? 'In Stock' : 'Out of Stock',
           style: TextStyle(
-            fontSize: 11,
+            fontSize: 10,
             fontWeight: FontWeight.w600,
             color: inStock ? AppColors.success : AppColors.error,
           ),
@@ -644,9 +648,12 @@ class _PremiumProductCardState extends State<PremiumProductCard>
 
   Widget _buildGridAddButton() {
     return Positioned(
-      bottom: 10,
-      right: 10,
+      bottom: 0,
+      right: 0,
       child: Container(
+        margin: const EdgeInsets.only(bottom: 4, right: 8),
+        width: 32,
+        height: 32,
         decoration: BoxDecoration(
           gradient: AppColors.primaryGradient,
           shape: BoxShape.circle,
@@ -658,12 +665,11 @@ class _PremiumProductCardState extends State<PremiumProductCard>
           child: InkWell(
             customBorder: const CircleBorder(),
             onTap: _onAddToCartTap,
-            child: const Padding(
-              padding: EdgeInsets.all(8),
+            child: const Center(
               child: Icon(
                 Icons.add_shopping_cart_outlined,
                 color: Colors.white,
-                size: 16,
+                size: 18,
               ),
             ),
           ),

@@ -9,13 +9,15 @@ import 'dart:ui';
 
 class EnhancedProductCard extends StatefulWidget {
   final Product product;
-  const EnhancedProductCard({Key? key, required this.product}) : super(key: key);
+  const EnhancedProductCard({Key? key, required this.product})
+      : super(key: key);
 
   @override
   State<EnhancedProductCard> createState() => _EnhancedProductCardState();
 }
 
-class _EnhancedProductCardState extends State<EnhancedProductCard> with SingleTickerProviderStateMixin {
+class _EnhancedProductCardState extends State<EnhancedProductCard>
+    with SingleTickerProviderStateMixin {
   // Animation controllers and variables
   late final AnimationController _scaleController = AnimationController(
     vsync: this,
@@ -47,12 +49,18 @@ class _EnhancedProductCardState extends State<EnhancedProductCard> with SingleTi
     duration: const Duration(milliseconds: 400),
   );
 
-  late final Animation<double> _scaleAnimation = Tween<double>(begin: 1.0, end: 0.97).animate(_scaleController);
-  late final Animation<double> _favoriteAnimation = Tween<double>(begin: 1.0, end: 0.85).animate(_favoriteController);
-  late final Animation<double> _cartAnimation = Tween<double>(begin: 1.0, end: 0.85).animate(_cartController);
-  late final Animation<double> _shimmerAnimation = Tween<double>(begin: -1.0, end: 1.0).animate(_shimmerController);
-  late final Animation<double> _rotationAnimation = Tween<double>(begin: 0.0, end: 2 * math.pi).animate(_rotationController);
-  late final Animation<Offset> _slideAnimation = Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero).animate(
+  late final Animation<double> _scaleAnimation =
+      Tween<double>(begin: 1.0, end: 0.97).animate(_scaleController);
+  late final Animation<double> _favoriteAnimation =
+      Tween<double>(begin: 1.0, end: 0.85).animate(_favoriteController);
+  late final Animation<double> _cartAnimation =
+      Tween<double>(begin: 1.0, end: 0.85).animate(_cartController);
+  late final Animation<double> _shimmerAnimation =
+      Tween<double>(begin: -1.0, end: 1.0).animate(_shimmerController);
+  late final Animation<double> _rotationAnimation =
+      Tween<double>(begin: 0.0, end: 2 * math.pi).animate(_rotationController);
+  late final Animation<Offset> _slideAnimation =
+      Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero).animate(
     CurvedAnimation(parent: _scaleController, curve: Curves.easeOutCubic),
   );
 
@@ -90,7 +98,8 @@ class _EnhancedProductCardState extends State<EnhancedProductCard> with SingleTi
       _rotationController.reverse();
     });
 
-    final favoriteProvider = Provider.of<FavoriteProvider>(context, listen: false);
+    final favoriteProvider =
+        Provider.of<FavoriteProvider>(context, listen: false);
     favoriteProvider.updateToFavoriteList(widget.product.sId ?? '');
   }
 
@@ -337,11 +346,16 @@ class _EnhancedProductCardState extends State<EnhancedProductCard> with SingleTi
                                     children: [
                                       // Product Image
                                       Positioned.fill(
-                                        child: widget.product.images?.isNotEmpty == true
+                                        child: widget.product.images
+                                                    ?.isNotEmpty ==
+                                                true
                                             ? Image.network(
-                                                widget.product.images!.first.url ?? '',
+                                                widget.product.images!.first
+                                                        .url ??
+                                                    '',
                                                 fit: BoxFit.cover,
-                                                errorBuilder: (context, error, stackTrace) {
+                                                errorBuilder: (context, error,
+                                                    stackTrace) {
                                                   return Container(
                                                     decoration: BoxDecoration(
                                                       gradient: LinearGradient(
@@ -352,9 +366,11 @@ class _EnhancedProductCardState extends State<EnhancedProductCard> with SingleTi
                                                       ),
                                                     ),
                                                     child: Icon(
-                                                      Icons.image_not_supported_outlined,
+                                                      Icons
+                                                          .image_not_supported_outlined,
                                                       size: 40,
-                                                      color: Colors.grey.shade400,
+                                                      color:
+                                                          Colors.grey.shade400,
                                                     ),
                                                   );
                                                 },
@@ -412,7 +428,8 @@ class _EnhancedProductCardState extends State<EnhancedProductCard> with SingleTi
                                       vertical: 2,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF667eea).withOpacity(0.09),
+                                      color: const Color(0xFF667eea)
+                                          .withOpacity(0.09),
                                       borderRadius: BorderRadius.circular(7),
                                     ),
                                     child: Text(
@@ -466,8 +483,10 @@ class _EnhancedProductCardState extends State<EnhancedProductCard> with SingleTi
                                         color:
                                             widget.product.quantity != null &&
                                                     widget.product.quantity! > 0
-                                                ? const Color(0xFF11998e).withOpacity(0.09)
-                                                : const Color(0xFFFF6B6B).withOpacity(0.09),
+                                                ? const Color(0xFF11998e)
+                                                    .withOpacity(0.09)
+                                                : const Color(0xFFFF6B6B)
+                                                    .withOpacity(0.09),
                                         borderRadius: BorderRadius.circular(5),
                                       ),
                                       child: Row(
@@ -479,7 +498,9 @@ class _EnhancedProductCardState extends State<EnhancedProductCard> with SingleTi
                                                 ? Icons.check_circle_outline
                                                 : Icons.remove_circle_outline,
                                             size: 11,
-                                            color: widget.product.quantity != null && widget.product.quantity! > 0
+                                            color: widget.product.quantity !=
+                                                        null &&
+                                                    widget.product.quantity! > 0
                                                 ? const Color(0xFF11998e)
                                                 : const Color(0xFFFF6B6B),
                                           ),
@@ -492,7 +513,10 @@ class _EnhancedProductCardState extends State<EnhancedProductCard> with SingleTi
                                             style: TextStyle(
                                               fontSize: 10,
                                               fontWeight: FontWeight.w600,
-                                              color: widget.product.quantity != null && widget.product.quantity! > 0
+                                              color: widget.product.quantity !=
+                                                          null &&
+                                                      widget.product.quantity! >
+                                                          0
                                                   ? const Color(0xFF11998e)
                                                   : const Color(0xFFFF6B6B),
                                             ),
