@@ -81,8 +81,29 @@ class ServiceRequestListSection extends StatelessWidget {
                     DataCell(Text(sr.customerName ?? '-')),
                     DataCell(Text(sr.phone ?? '-')),
                     DataCell(Text(sr.category ?? '-')),
-                    DataCell(Text(
-                        '${sr.preferredDate ?? ''}  ${sr.preferredTime ?? ''}')),
+                    DataCell(
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            sr.preferredDate?.isNotEmpty == true 
+                                ? sr.preferredDate!
+                                : 'No date',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          Text(
+                            sr.preferredTime?.isNotEmpty == true 
+                                ? sr.preferredTime!
+                                : 'No time',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.white.withOpacity(0.7),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     DataCell(_StatusBadge(status: sr.status ?? 'pending')),
                     DataCell(Row(
                       children: [
@@ -99,8 +120,8 @@ class ServiceRequestListSection extends StatelessWidget {
                                     ),
                                   );
                                   if (result == true) {
-                                    context.dataProvider
-                                        .getAllServiceRequests();
+                                    // Force refresh to ensure UI is updated
+                                    await context.dataProvider.getAllServiceRequests();
                                   }
                                 },
                           icon: const Icon(Icons.check_circle,
@@ -119,8 +140,8 @@ class ServiceRequestListSection extends StatelessWidget {
                                     ),
                                   );
                                   if (result == true) {
-                                    context.dataProvider
-                                        .getAllServiceRequests();
+                                    // Force refresh to ensure UI is updated
+                                    await context.dataProvider.getAllServiceRequests();
                                   }
                                 },
                           icon: const Icon(Icons.play_circle_fill,
@@ -139,8 +160,8 @@ class ServiceRequestListSection extends StatelessWidget {
                                     ),
                                   );
                                   if (result == true) {
-                                    context.dataProvider
-                                        .getAllServiceRequests();
+                                    // Force refresh to ensure UI is updated
+                                    await context.dataProvider.getAllServiceRequests();
                                   }
                                 },
                           icon: const Icon(Icons.task_alt,
@@ -159,8 +180,8 @@ class ServiceRequestListSection extends StatelessWidget {
                                     ),
                                   );
                                   if (result == true) {
-                                    context.dataProvider
-                                        .getAllServiceRequests();
+                                    // Force refresh to ensure UI is updated
+                                    await context.dataProvider.getAllServiceRequests();
                                   }
                                 },
                           icon:
@@ -197,18 +218,67 @@ class _StatusBadge extends StatelessWidget {
     }
   }
 
+  IconData _iconFor(String s) {
+    switch (s) {
+      case 'approved':
+        return Icons.check_circle;
+      case 'in-progress':
+        return Icons.play_circle_fill;
+      case 'completed':
+        return Icons.task_alt;
+      case 'cancelled':
+        return Icons.cancel;
+      case 'pending':
+        return Icons.pending;
+      default:
+        return Icons.help_outline;
+    }
+  }
+
+  String _displayText(String s) {
+    switch (s) {
+      case 'in-progress':
+        return 'In Progress';
+      case 'approved':
+        return 'Approved';
+      case 'completed':
+        return 'Completed';
+      case 'cancelled':
+        return 'Cancelled';
+      case 'pending':
+        return 'Pending';
+      default:
+        return s.toUpperCase();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: _colorFor(status).withOpacity(0.15),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: _colorFor(status).withOpacity(0.5)),
       ),
-      child: Text(
-        status,
-        style: TextStyle(color: _colorFor(status), fontWeight: FontWeight.w600),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            _iconFor(status),
+            size: 16,
+            color: _colorFor(status),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            _displayText(status),
+            style: TextStyle(
+              color: _colorFor(status),
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+            ),
+          ),
+        ],
       ),
     );
   }

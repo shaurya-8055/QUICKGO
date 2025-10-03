@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 
 import '../../../models/api_response.dart';
 import '../../../services/http_services.dart';
 import '../../../utility/snack_bar_helper.dart';
+import '../../../core/data/data_provider.dart';
 
 class ServiceProvider extends ChangeNotifier {
   final HttpService _http = HttpService();
@@ -24,8 +26,8 @@ class ServiceProvider extends ChangeNotifier {
     required String phone,
     required String address,
     String? description,
-    required String preferredDate, // ISO string
-    required String preferredTime, // e.g., "2:30 PM"
+    required String preferredDate,
+    required String preferredTime,
     String status = 'pending',
   }) async {
     try {
@@ -44,6 +46,7 @@ class ServiceProvider extends ChangeNotifier {
 
       final Response res = await _http.addItem(
           endpointUrl: 'service-requests', itemData: payload);
+
       if (res.isOk) {
         final api = ApiResponse.fromJson(res.body, (obj) => obj);
         if (api.success) {
@@ -54,22 +57,24 @@ class ServiceProvider extends ChangeNotifier {
           return (false, api.message);
         }
       } else {
-        final msg = res.body?['message']?.toString() ??
-            res.statusText ??
-            'Request failed';
+        final msg = res.body is Map
+            ? res.body['message']?.toString() ??
+                res.body['error']?.toString() ??
+                'Request failed'
+            : res.statusText ?? 'Request failed';
         SnackBarHelper.showErrorSnackBar(msg);
         return (false, msg);
       }
     } catch (e) {
       final msg = e.toString();
-      SnackBarHelper.showErrorSnackBar(msg);
+      SnackBarHelper.showErrorSnackBar('Create Error: $msg');
       return (false, msg);
     } finally {
       _setSubmitting(false);
     }
   }
 
-  // Admin: update status/assignee/notes
+  // Admin: update status/assignee/notes using PUT
   Future<(bool, String)> updateStatus({
     required String id,
     required String status,
@@ -90,11 +95,14 @@ class ServiceProvider extends ChangeNotifier {
           'assigneePhone': assigneePhone,
         if (notes != null && notes.isNotEmpty) 'notes': notes,
       };
-      final Response res = await _http.patchItem(
+
+      // ✅ CHANGED: Using updateItem (PUT) instead of patchItem (PATCH)
+      final Response res = await _http.updateItem(
         endpointUrl: 'service-requests',
         itemId: id,
         itemData: payload,
       );
+
       if (res.isOk) {
         final api = ApiResponse.fromJson(res.body, (obj) => obj);
         if (api.success) {
@@ -105,14 +113,16 @@ class ServiceProvider extends ChangeNotifier {
           return (false, api.message);
         }
       } else {
-        final msg = res.body?['message']?.toString() ??
-            res.statusText ??
-            'Update failed';
-        SnackBarHelper.showErrorSnackBar(msg);
+        final msg = res.body is Map
+            ? res.body['message']?.toString() ??
+                res.body['error']?.toString() ??
+                'Update failed'
+            : res.statusText ?? 'Update failed';
+        SnackBarHelper.showErrorSnackBar('Update Error: $msg');
         return (false, msg);
       }
     } catch (e) {
-      final msg = e.toString();
+      final msg = 'Network error: ${e.toString()}';
       SnackBarHelper.showErrorSnackBar(msg);
       return (false, msg);
     } finally {
@@ -120,7 +130,7 @@ class ServiceProvider extends ChangeNotifier {
     }
   }
 
-  // Admin: update service request status and assignee
+  // Admin: update service request status and assignee using PUT
   Future<(bool, String)> updateServiceRequest({
     required String id,
     String? status,
@@ -128,6 +138,7 @@ class ServiceProvider extends ChangeNotifier {
     String? assigneeName,
     String? assigneePhone,
     String? notes,
+    BuildContext? context, // Add context to refresh data
   }) async {
     try {
       _setSubmitting(true);
@@ -138,30 +149,50 @@ class ServiceProvider extends ChangeNotifier {
       if (assigneePhone != null) payload['assigneePhone'] = assigneePhone;
       if (notes != null && notes.isNotEmpty) payload['notes'] = notes;
 
-      final Response res = await _http.patchItem(
+      print('Updating service request $id with payload: $payload');
+
+      // ✅ CHANGED: Using updateItem (PUT) instead of patchItem (PATCH)
+      final Response res = await _http.updateItem(
         endpointUrl: 'service-requests',
         itemId: id,
         itemData: payload,
       );
 
+      print('Update response status: ${res.statusCode}');
+      print('Update response body: ${res.body}');
+
       if (res.isOk) {
         final api = ApiResponse.fromJson(res.body, (obj) => obj);
         if (api.success) {
           SnackBarHelper.showSuccessSnackBar(api.message);
+          
+          // Automatically refresh the service requests data
+          if (context != null) {
+            try {
+              await context.read<DataProvider>().getAllServiceRequests();
+              print('✓ Service requests data refreshed automatically');
+            } catch (e) {
+              print('Warning: Could not refresh data provider: $e');
+            }
+          }
+          
           return (true, api.message);
         } else {
           SnackBarHelper.showErrorSnackBar(api.message);
           return (false, api.message);
         }
       } else {
-        final msg = res.body?['message']?.toString() ??
-            res.statusText ??
-            'Update failed';
-        SnackBarHelper.showErrorSnackBar(msg);
+        final msg = res.body is Map
+            ? res.body['message']?.toString() ??
+                res.body['error']?.toString() ??
+                'Update failed'
+            : res.statusText ?? 'Update failed';
+        SnackBarHelper.showErrorSnackBar('Update Error: $msg');
         return (false, msg);
       }
     } catch (e) {
-      final msg = e.toString();
+      final msg = 'Network error: ${e.toString()}';
+      print('Service request update error: $msg');
       SnackBarHelper.showErrorSnackBar(msg);
       return (false, msg);
     } finally {
@@ -169,12 +200,13 @@ class ServiceProvider extends ChangeNotifier {
     }
   }
 
-  // Admin: delete a request (optional cleanup)
+  // Admin: delete a request
   Future<(bool, String)> deleteRequest(String id) async {
     try {
       _setSubmitting(true);
       final Response res =
           await _http.deleteItem(endpointUrl: 'service-requests', itemId: id);
+
       if (res.isOk) {
         final api = ApiResponse.fromJson(res.body, (obj) => obj);
         if (api.success) {
@@ -185,15 +217,17 @@ class ServiceProvider extends ChangeNotifier {
           return (false, api.message);
         }
       } else {
-        final msg = res.body?['message']?.toString() ??
-            res.statusText ??
-            'Delete failed';
-        SnackBarHelper.showErrorSnackBar(msg);
+        final msg = res.body is Map
+            ? res.body['message']?.toString() ??
+                res.body['error']?.toString() ??
+                'Delete failed'
+            : res.statusText ?? 'Delete failed';
+        SnackBarHelper.showErrorSnackBar('Delete Error: $msg');
         return (false, msg);
       }
     } catch (e) {
       final msg = e.toString();
-      SnackBarHelper.showErrorSnackBar(msg);
+      SnackBarHelper.showErrorSnackBar('Delete Network Error: $msg');
       return (false, msg);
     } finally {
       _setSubmitting(false);
