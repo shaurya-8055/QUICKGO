@@ -469,6 +469,7 @@ class _ServiceActionDialogState extends State<ServiceActionDialog> {
                   notes: _notesController.text.trim().isEmpty
                       ? null
                       : _notesController.text.trim(),
+                  context: context, // Pass context for automatic data refresh
                 );
 
         if (success) {

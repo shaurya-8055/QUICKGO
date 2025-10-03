@@ -449,8 +449,8 @@ class _QuickActionFabState extends State<QuickActionFab>
           children: [
             // Enhanced FAB with rotating border
             Container(
-              width: 56,
-              height: 56,
+              width: 46,
+              height: 46,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: const LinearGradient(
@@ -503,7 +503,7 @@ class _QuickActionFabState extends State<QuickActionFab>
                     child: const Icon(
                       Icons.qr_code_scanner_rounded,
                       color: Colors.white,
-                      size: 24,
+                      size: 20,
                     ),
                   ),
                 ],
