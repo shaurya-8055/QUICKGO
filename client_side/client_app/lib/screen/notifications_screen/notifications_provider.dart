@@ -36,19 +36,29 @@ class NotificationsProvider extends ChangeNotifier {
   }
 
   void _save() {
-    _box.write(
-      _storeKey,
-      _items.map((e) => e.toJson()).toList(),
-    );
+    try {
+      _box.write(
+        _storeKey,
+        _items.map((e) => e.toJson()).toList(),
+      );
+    } catch (e) {
+      // Silently handle storage errors - notifications are non-critical
+      print('Storage error: $e');
+    }
   }
 
   void _load() {
-    final raw = _box.read<List>(_storeKey);
-    if (raw == null) return;
-    _items
-      ..clear()
-      ..addAll(raw
-          .whereType<Map>()
-          .map((e) => AppNotification.fromJson(Map<String, dynamic>.from(e))));
+    try {
+      final raw = _box.read<List>(_storeKey);
+      if (raw == null) return;
+      _items
+        ..clear()
+        ..addAll(raw
+            .whereType<Map>()
+            .map((e) => AppNotification.fromJson(Map<String, dynamic>.from(e))));
+    } catch (e) {
+      // Silently handle storage errors - start with empty notifications
+      print('Storage load error: $e');
+    }
   }
 }

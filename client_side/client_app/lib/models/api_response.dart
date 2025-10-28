@@ -10,8 +10,8 @@ class ApiResponse<T> {
       T Function(Object? json)? fromJsonT,
       ) =>
       ApiResponse(
-        success: json['success'] as bool,
-        message: json['message'] as String,
-        data: json['data'] != null ? fromJsonT!(json['data']) : null,
+        success: json['success'] as bool? ?? false,
+        message: (json['message'] as String?) ?? 'No message',
+        data: json['data'] != null && fromJsonT != null ? fromJsonT(json['data']) : null,
       );
 }
