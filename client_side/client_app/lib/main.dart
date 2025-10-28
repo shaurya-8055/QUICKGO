@@ -31,7 +31,7 @@ import 'screen/notifications_screen/notifications_screen.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
-  
+
   // Load environment variables (skip if file doesn't exist, e.g., on Vercel)
   try {
     await dotenv.load(fileName: ".env");
