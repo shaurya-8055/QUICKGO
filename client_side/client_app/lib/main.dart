@@ -32,8 +32,12 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
   
-  // Load environment variables
-  await dotenv.load(fileName: ".env");
+  // Load environment variables (skip if file doesn't exist, e.g., on Vercel)
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    print('Note: .env file not found, using system environment variables');
+  }
   var cart = FlutterCart();
 
   // Initialize OneSignal only on mobile platforms to avoid web plugin issues

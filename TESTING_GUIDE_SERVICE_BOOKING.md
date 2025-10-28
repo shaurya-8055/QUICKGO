@@ -5,17 +5,21 @@
 ### 1. Test Client App - Service Booking
 
 #### Prerequisites:
+
 - Client app running on emulator/device
 - User logged in
 - Backend API running
 
 #### Test Steps:
+
 1. **Navigate to Services**:
+
    - Open the app
    - Go to Services section
    - Select any service category (e.g., Painter, Plumber)
 
 2. **Fill Booking Form**:
+
    - Enter customer name
    - Enter phone number
    - Enter address
@@ -24,6 +28,7 @@
    - Choose time slot (Morning/Afternoon/Evening)
 
 3. **Submit Booking**:
+
    - Click "Book Service" or "Submit" button
    - **Expected**: Green success SnackBar appears
    - **Expected**: Message says "Service booking request submitted successfully!"
@@ -31,6 +36,7 @@
    - **Expected**: Automatically navigate back after 1.5 seconds
 
 4. **Verify Notification**:
+
    - After successful booking, tap the bell icon (notifications)
    - **Expected**: See new notification "Service booking submitted"
    - **Expected**: Notification shows category and time slot
@@ -43,17 +49,21 @@
 ### 2. Test Admin Portal - View Bookings
 
 #### Prerequisites:
+
 - Admin app running on browser/desktop
 - Admin logged in
 - At least one service booking created
 
 #### Test Steps:
+
 1. **Navigate to Service Requests**:
+
    - Log into admin portal
    - Find "Service Requests" in the sidebar
    - Click to open Service Requests screen
 
 2. **Verify Booking Display**:
+
    - **Expected**: See data table with all service requests
    - **Expected**: Your test booking is visible
    - Check columns display correctly:
@@ -65,6 +75,7 @@
      - Status (should be "pending")
 
 3. **Test Filtering**:
+
    - Click the status dropdown
    - Select "pending"
    - **Expected**: Only pending requests shown
@@ -72,6 +83,7 @@
    - **Expected**: All requests visible again
 
 4. **Test Search**:
+
    - Type customer name in search box
    - **Expected**: List filters to matching records
    - Type phone number
@@ -80,6 +92,7 @@
    - **Expected**: All records visible again
 
 5. **Test Refresh**:
+
    - Click refresh button (circular arrow icon)
    - **Expected**: Success message appears
    - **Expected**: List reloads with latest data
@@ -93,6 +106,7 @@
 ### 3. Edge Case Testing
 
 #### Test Without Internet:
+
 1. Turn off WiFi/mobile data
 2. Try to book a service
 3. **Expected**: Error message about network failure
@@ -100,6 +114,7 @@
 5. **Should NOT**: Crash the app
 
 #### Test Rapid Booking:
+
 1. Book a service
 2. Immediately try to book again (within 5 seconds)
 3. **Expected**: Message "Please wait a few seconds before submitting again"
@@ -108,6 +123,7 @@
 6. **Expected**: Booking should work normally
 
 #### Test with Empty Fields:
+
 1. Leave required fields empty
 2. Try to submit
 3. **Expected**: Validation errors for required fields
@@ -116,6 +132,7 @@
 ### 4. Log Verification
 
 #### Check Console Output:
+
 ```bash
 # In client app terminal, look for:
 ✓ Service request created
@@ -128,6 +145,7 @@
 ```
 
 #### Check Backend Logs:
+
 ```bash
 # In API terminal, look for:
 ✓ POST /service-requests 200 OK
@@ -142,6 +160,7 @@
 ## Success Criteria
 
 ### Client App:
+
 - ✅ Booking completes without showing null operator error
 - ✅ Success message displays correctly
 - ✅ Notification is added to notifications list
@@ -149,6 +168,7 @@
 - ✅ App doesn't crash during booking process
 
 ### Admin Portal:
+
 - ✅ All service bookings are visible
 - ✅ Filter by status works correctly
 - ✅ Search functionality works
@@ -157,6 +177,7 @@
 - ✅ Action buttons are responsive
 
 ### Backend:
+
 - ✅ Service requests saved to database
 - ✅ All fields persisted correctly
 - ✅ Timestamps recorded
@@ -166,27 +187,35 @@
 ## Common Issues & Solutions
 
 ### Issue: Still seeing null operator error
-**Solution**: 
+
+**Solution**:
+
 - Ensure you've hot restarted the app (not just hot reload)
 - Check that GetStorage.init() is called in main.dart
 - Verify NotificationsProvider is registered in MultiProvider
 
 ### Issue: Bookings not showing in admin portal
+
 **Solution**:
+
 - Verify API endpoint is accessible: http://your-api/service-requests
 - Check that admin portal is using same API base URL as client
 - Try refreshing the admin portal
 - Check browser console for errors
 
 ### Issue: Notifications not appearing
+
 **Solution**:
+
 - This is now non-critical - booking should still work
 - Check console for "Storage error" messages
 - Verify GetStorage is properly initialized
 - Try clearing app data and restarting
 
 ### Issue: Admin portal showing empty list
+
 **Solution**:
+
 - Click the refresh button
 - Check network tab in browser dev tools
 - Verify API is returning data
@@ -206,9 +235,10 @@ cd client_side/client_app
 ## Database Verification
 
 ### MongoDB Query to Check Bookings:
+
 ```javascript
 // In MongoDB Compass or Shell
-db.servicerequests.find().sort({createdAt: -1}).limit(10)
+db.servicerequests.find().sort({ createdAt: -1 }).limit(10);
 
 // Should return recent bookings with:
 // - userID (not null)

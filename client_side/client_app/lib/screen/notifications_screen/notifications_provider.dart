@@ -53,9 +53,8 @@ class NotificationsProvider extends ChangeNotifier {
       if (raw == null) return;
       _items
         ..clear()
-        ..addAll(raw
-            .whereType<Map>()
-            .map((e) => AppNotification.fromJson(Map<String, dynamic>.from(e))));
+        ..addAll(raw.whereType<Map>().map(
+            (e) => AppNotification.fromJson(Map<String, dynamic>.from(e))));
     } catch (e) {
       // Silently handle storage errors - start with empty notifications
       print('Storage load error: $e');

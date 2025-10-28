@@ -65,4 +65,5 @@ flutter:
 
   assets:
     - assets/images/
-    - .env
+    # .env file is loaded from root during local development
+    # For production/Vercel, use environment variables in dashboard
