@@ -46,6 +46,7 @@ dependencies:
   firebase_storage: ^12.3.2 # File/image storage for chat
   # agora_rtc_engine: ^6.3.2 # Video/voice calling - Commented out due to network issues, uncomment when implementing calling feature
   permission_handler: ^11.0.1 # Location/camera/mic permissions
+  flutter_dotenv: ^6.0.0 # Load environment variables from .env file
 
 dev_dependencies:
   flutter_lints: ^3.0.1
@@ -64,3 +65,4 @@ flutter:
 
   assets:
     - assets/images/
+    - .env
