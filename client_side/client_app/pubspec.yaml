@@ -37,6 +37,15 @@ dependencies:
   flutter_staggered_animations: ^1.1.1
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  google_generative_ai: ^0.4.7 # Gemini AI for smart recommendations
+  google_maps_flutter: ^2.5.0 # Maps for worker location
+  geolocator: ^11.0.0 # Get user location
+  flutter_polyline_points: ^2.0.0 # Route drawing on map
+  firebase_core: ^3.6.0 # Firebase setup
+  firebase_database: ^11.1.4 # Realtime chat
+  firebase_storage: ^12.3.2 # File/image storage for chat
+  # agora_rtc_engine: ^6.3.2 # Video/voice calling - Commented out due to network issues, uncomment when implementing calling feature
+  permission_handler: ^11.0.1 # Location/camera/mic permissions
 
 dev_dependencies:
   flutter_lints: ^3.0.1

@@ -4,10 +4,17 @@ import '../login_screen/provider/user_provider.dart';
 import 'provider/service_provider.dart';
 import '../notifications_screen/notifications_provider.dart';
 import '../../models/app_notification.dart';
+import '../../models/technician.dart';
 
 class ServiceBookingScreen extends StatefulWidget {
   final String category;
-  const ServiceBookingScreen({super.key, required this.category});
+  final Technician? preSelectedTechnician;
+
+  const ServiceBookingScreen({
+    super.key,
+    required this.category,
+    this.preSelectedTechnician,
+  });
 
   @override
   State<ServiceBookingScreen> createState() => _ServiceBookingScreenState();

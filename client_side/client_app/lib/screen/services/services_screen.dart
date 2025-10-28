@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'service_booking_screen.dart';
+import 'worker_discovery_screen.dart';
 import '../home_screen.dart';
 
 class ServicesScreen extends StatelessWidget {
@@ -69,15 +70,63 @@ class ServicesScreen extends StatelessWidget {
                     title: cat.title,
                     color: cat.color,
                     icon: cat.icon,
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            ServiceBookingScreen(category: cat.title),
-                      ),
-                    ),
+                    onTap: () => _showServiceOptions(context, cat.title),
                   );
                 },
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showServiceOptions(BuildContext context, String category) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              category,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 20),
+            ListTile(
+              leading: const Icon(Icons.map_rounded, color: Colors.blue),
+              title: const Text('Find Workers Nearby'),
+              subtitle: const Text('View workers on map and filter by rating'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        WorkerDiscoveryScreen(serviceCategory: category),
+                  ),
+                );
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading:
+                  const Icon(Icons.calendar_today_rounded, color: Colors.green),
+              title: const Text('Quick Booking'),
+              subtitle: const Text('Book service without choosing worker'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ServiceBookingScreen(category: category),
+                  ),
+                );
+              },
             ),
           ],
         ),
