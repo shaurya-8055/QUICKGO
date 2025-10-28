@@ -7,9 +7,11 @@ class GeminiAIService {
   late final GenerativeModel _model;
 
   GeminiAIService() {
-    final apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
+    // Try to get API key from .env first, then fall back to compile-time constant
+    final apiKey = dotenv.env['GEMINI_API_KEY'] ?? 
+                   const String.fromEnvironment('GEMINI_API_KEY', defaultValue: '');
     if (apiKey.isEmpty) {
-      throw Exception('GEMINI_API_KEY not found in .env file');
+      throw Exception('GEMINI_API_KEY not found. Set it in .env file or as build argument.');
     }
     _model = GenerativeModel(
       model: 'gemini-1.5-flash',
