@@ -1,15 +1,19 @@
 import 'dart:convert';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/technician.dart';
 
 class GeminiAIService {
-  static const String _apiKey = 'AIzaSyBk3iLMocfigZ0KPiq1igjFZp-9IQRD0P8'; // TODO: Move to .env
   late final GenerativeModel _model;
 
   GeminiAIService() {
+    final apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
+    if (apiKey.isEmpty) {
+      throw Exception('GEMINI_API_KEY not found in .env file');
+    }
     _model = GenerativeModel(
       model: 'gemini-1.5-flash',
-      apiKey: _apiKey,
+      apiKey: apiKey,
     );
   }
 

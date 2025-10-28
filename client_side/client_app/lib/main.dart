@@ -17,18 +17,23 @@ import 'dart:ui' show PointerDeviceKind;
 import 'package:flutter/foundation.dart'
     show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'core/data/data_provider.dart';
 import 'utility/theme_provider.dart';
 import 'screen/notifications_screen/notifications_provider.dart';
 import 'models/app_notification.dart';
 import 'package:flutter/scheduler.dart';
 import 'screen/services/provider/service_provider.dart';
+import 'screen/services/provider/technician_provider.dart';
 import 'services/local_notification_service.dart';
 import 'screen/notifications_screen/notifications_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
+  
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
   var cart = FlutterCart();
 
   // Initialize OneSignal only on mobile platforms to avoid web plugin issues
@@ -66,6 +71,7 @@ Future<void> main() async {
         ChangeNotifierProvider(
             create: (context) => FavoriteProvider(context.dataProvider)),
         ChangeNotifierProvider(create: (context) => ServiceProvider()),
+        ChangeNotifierProvider(create: (context) => TechnicianProvider()),
       ],
       child: const MyApp(),
     ),
