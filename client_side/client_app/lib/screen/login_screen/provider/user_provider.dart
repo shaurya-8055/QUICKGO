@@ -62,33 +62,45 @@ class UserProvider extends ChangeNotifier {
 
   Future<String?> register(SignupData data) async {
     try {
-      // Collect username OR email based on input, plus phone (normalized)
+      // Collect username OR email based on input, plus name
       final raw = data.name?.trim() ?? '';
       final emailRegex = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
-      final phoneRaw = (data.additionalSignupData?["phone"] ?? '').toString();
-      final phone = phoneRaw.replaceAll(RegExp(r"[\s-]"), '');
+      final name = (data.additionalSignupData?["name"] ?? '').toString().trim();
+
       final payload = <String, dynamic>{
         if (emailRegex.hasMatch(raw))
           "email": raw.toLowerCase()
         else
           "username": raw.toLowerCase(),
-        "phone": phone,
         "password": data.password,
+        if (name.isNotEmpty) "name": name,
       };
+
       final response = await service.addItem(
           endpointUrl: 'auth/register', itemData: payload);
+
       if (response.isOk) {
         final body = response.body;
         final success = body['success'] == true;
         if (success) {
-          // Persist pending phone so Login screen can route to OTP screen
-          final phone = payload['phone'];
-          if (phone != null) {
-            await box.write(PENDING_OTP_PHONE, phone);
+          // User is now registered and logged in automatically
+          final user =
+              User.fromJson(body['data']['user'] as Map<String, dynamic>);
+          final accessToken =
+              body['data']['accessToken'] ?? body['data']['token'];
+          final refreshToken = body['data']['refreshToken'];
+
+          await saveLoginInfo(user);
+          if (accessToken != null) {
+            await box.write(AUTH_TOKEN_BOX, accessToken);
           }
+          if (refreshToken != null) {
+            await box.write('refresh_token', refreshToken);
+          }
+
           SnackBarHelper.showSuccessSnackBar(
-              body['message'] ?? 'Registered. Verify OTP.');
-          log('Register Success');
+              body['message'] ?? 'Registration successful!');
+          log('Registration Success - Auto logged in');
           return null;
         } else {
           SnackBarHelper.showErrorSnackBar(
@@ -149,6 +161,22 @@ class UserProvider extends ChangeNotifier {
         return null;
       }
       return res.body?['message'] ?? 'OTP verification failed';
+    } catch (e) {
+      return 'Error: $e';
+    }
+  }
+
+  Future<String?> recoverPassword(String email) async {
+    try {
+      final res = await service.addItem(
+          endpointUrl: 'auth/forgot-password',
+          itemData: {'email': email.toLowerCase()});
+      if (res.isOk && (res.body['success'] == true)) {
+        SnackBarHelper.showSuccessSnackBar(
+            res.body['message'] ?? 'Password reset link sent to your email');
+        return null;
+      }
+      return res.body?['message'] ?? 'Failed to send password reset link';
     } catch (e) {
       return 'Error: $e';
     }

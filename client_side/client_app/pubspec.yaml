@@ -16,8 +16,8 @@ dependencies:
   smooth_page_indicator: ^1.2.1 #for animate the CarouselSlider product image slider
   flutter_rating_bar: ^4.0.1 #for show start rating
   font_awesome_flutter: ^10.8.0 #for use icons
-  animations: ^2.0.11 #for animation
-  provider: ^6.1.2 #for state-management
+  animations: ^2.1.0 #for animation
+  provider: ^6.1.5+1 #for state-management
   dropdown_button2: ^2.3.9 #for dropdown
   flutter_cart: ^0.0.9 #for handle cart easly
   get_storage: ^2.1.1 #to store local data like shared preference
@@ -27,26 +27,31 @@ dependencies:
   razorpay_flutter: ^1.3.6 #for payment India
   onesignal_flutter: ^5.2.9 #fro send notification
   flutter_staggered_grid_view: ^0.7.0 # for masonry grid layout
-  url_launcher: ^6.3.0 # open external links on web/mobile
-  flutter_local_notifications: ^19.4.0
+  url_launcher: ^6.3.2 # open external links on web/mobile
+  flutter_local_notifications: ^19.5.0
   cached_network_image: ^3.4.1 # Image caching for better performance
   shimmer: ^3.0.0 # Shimmer loading effects
   visibility_detector: ^0.4.0+2 # Detect widget visibility for lazy loading
-  image_picker: ^1.0.4 # For picking images from gallery/camera
-  http: ^1.1.0 # HTTP client for API requests
+  image_picker: ^1.2.0 # For picking images from gallery/camera
+  http: ^1.5.0 # HTTP client for API requests
   flutter_staggered_animations: ^1.1.1
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   google_generative_ai: ^0.4.7 # Gemini AI for smart recommendations
-  google_maps_flutter: ^2.5.0 # Maps for worker location
-  geolocator: ^11.0.0 # Get user location
+  google_maps_flutter: ^2.13.1 # Maps for worker location
+  geolocator: ^14.0.2 # Get user location
   flutter_polyline_points: ^2.0.0 # Route drawing on map
-  firebase_core: ^3.6.0 # Firebase setup
-  firebase_database: ^11.1.4 # Realtime chat
-  firebase_storage: ^12.3.2 # File/image storage for chat
+  firebase_core: ^4.2.0 # Firebase setup
+  firebase_database: ^12.0.3 # Realtime chat
+  firebase_storage: ^13.0.3 # File/image storage for chat
   # agora_rtc_engine: ^6.3.2 # Video/voice calling - Commented out due to network issues, uncomment when implementing calling feature
-  permission_handler: ^11.0.1 # Location/camera/mic permissions
+  permission_handler: ^12.0.1 # Location/camera/mic permissions
   flutter_dotenv: ^6.0.0 # Load environment variables from .env file
+  firebase_messaging: ^16.0.3
+  fl_chart: ^1.1.1
+  intl: ^0.20.2
+  share_plus: ^12.0.1
+  dio: ^5.9.0
 
 dev_dependencies:
   flutter_lints: ^3.0.1

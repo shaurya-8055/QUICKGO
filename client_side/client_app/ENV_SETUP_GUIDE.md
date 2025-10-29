@@ -12,6 +12,7 @@ This guide explains how to set up API keys securely using environment variables.
 ### 1. Get Your API Keys
 
 #### **Google Maps API Key**
+
 1. Go to [Google Cloud Console](https://console.cloud.google.com/google/maps-apis)
 2. Create a new project or select an existing one
 3. Enable the following APIs:
@@ -26,6 +27,7 @@ This guide explains how to set up API keys securely using environment variables.
    - API restrictions: Select "Restrict key" and choose the Maps-related APIs
 
 #### **Google Gemini AI API Key**
+
 1. Go to [Google AI Studio](https://ai.google.dev/)
 2. Click "Get API key"
 3. Create a new API key
@@ -42,7 +44,7 @@ This guide explains how to set up API keys securely using environment variables.
 # Google Maps API Key
 GOOGLE_MAPS_API_KEY=YOUR_ACTUAL_GOOGLE_MAPS_KEY_HERE
 
-# Google Gemini AI API Key  
+# Google Gemini AI API Key
 GEMINI_API_KEY=YOUR_ACTUAL_GEMINI_KEY_HERE
 ```
 
@@ -56,6 +58,7 @@ If you prefer not to use the `.env` file approach, you can configure the API key
 
 **For Google Maps:**
 Update `android/app/src/main/AndroidManifest.xml`:
+
 ```xml
 <meta-data
     android:name="com.google.android.geo.API_KEY"
@@ -64,6 +67,7 @@ Update `android/app/src/main/AndroidManifest.xml`:
 
 **For Gemini AI:**
 Update `lib/services/gemini_ai_service.dart`:
+
 ```dart
 GeminiAIService() {
   final apiKey = 'YOUR_GEMINI_KEY_HERE'; // Not recommended - use .env instead
@@ -85,16 +89,19 @@ flutter pub get
 ### 4. Verify Setup
 
 1. The `.env` file should be loaded in `lib/main.dart`:
+
 ```dart
 await dotenv.load(fileName: ".env");
 ```
 
 2. Gemini AI service should read from environment:
+
 ```dart
 final apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
 ```
 
 3. Run the app to test:
+
 ```bash
 flutter run --debug
 ```
@@ -102,6 +109,7 @@ flutter run --debug
 ## 🔒 Security Best Practices
 
 ### ✅ DO:
+
 - ✅ Use `.env` for local development
 - ✅ Keep `.env` in `.gitignore`
 - ✅ Use `.env.example` as a template (can be committed)
@@ -111,6 +119,7 @@ flutter run --debug
 - ✅ Monitor API usage in Google Cloud Console
 
 ### ❌ DON'T:
+
 - ❌ Commit `.env` to version control
 - ❌ Share API keys publicly
 - ❌ Use the same API keys across multiple projects
@@ -137,6 +146,7 @@ client_app/
 When a new developer clones the project:
 
 1. Copy `.env.example` to `.env`:
+
    ```bash
    cp .env.example .env
    ```
@@ -152,16 +162,19 @@ When a new developer clones the project:
 ## ⚠️ Troubleshooting
 
 ### "GEMINI_API_KEY not found in .env file"
+
 - Make sure `.env` exists in the project root
 - Verify the key name is exactly `GEMINI_API_KEY` (case-sensitive)
 - Run `flutter clean` and `flutter pub get`
 
 ### "Google Maps not loading"
+
 - Check that your API key is correctly set in AndroidManifest.xml
 - Verify the API key has Maps SDK for Android enabled
 - Check that your app's SHA-1 fingerprint is added to the API key restrictions
 
 ### "Package 'flutter_dotenv' not found"
+
 - Run `flutter pub add flutter_dotenv`
 - Run `flutter pub get`
 
@@ -175,6 +188,7 @@ When a new developer clones the project:
 ## 🔄 Updating API Keys in Production
 
 For production builds, consider using:
+
 - Flutter Build Configurations
 - CI/CD environment variables
 - Secret management services (AWS Secrets Manager, Google Secret Manager, etc.)

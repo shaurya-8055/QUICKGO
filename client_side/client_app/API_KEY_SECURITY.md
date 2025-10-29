@@ -9,6 +9,7 @@ Your Google Maps and Gemini API keys were previously committed to GitHub in plai
 ### 1. Rotate Your API Keys
 
 #### Google Maps API Key
+
 1. Go to [Google Cloud Console](https://console.cloud.google.com/google/maps-apis)
 2. Navigate to "Credentials"
 3. Find your current API key: `AIzaSyCgOqTDaGNCPeSUI54vYjYPWZJWsloQtYM`
@@ -17,6 +18,7 @@ Your Google Maps and Gemini API keys were previously committed to GitHub in plai
 6. Set proper restrictions (see below)
 
 #### Google Gemini API Key
+
 1. Go to [Google AI Studio](https://ai.google.dev/)
 2. Revoke your current API key: `AIzaSyBk3iLMocfigZ0KPiq1igjFZp-9IQRD0P8`
 3. Generate a new API key
@@ -26,12 +28,14 @@ Your Google Maps and Gemini API keys were previously committed to GitHub in plai
 After generating new API keys:
 
 1. Open `.env` file (already in .gitignore):
+
 ```env
 GOOGLE_MAPS_API_KEY=your_new_google_maps_key_here
 GEMINI_API_KEY=your_new_gemini_key_here
 ```
 
 2. Update `android/app/src/main/AndroidManifest.xml`:
+
 ```xml
 <meta-data
     android:name="com.google.android.geo.API_KEY"
@@ -41,11 +45,11 @@ GEMINI_API_KEY=your_new_gemini_key_here
 ### 3. Set Up API Key Restrictions
 
 #### For Google Maps API Key:
-1. **Application restrictions**: 
+
+1. **Application restrictions**:
    - Select "Android apps"
    - Add your app's package name: `com.example.client_app`
    - Add your SHA-1 certificate fingerprint
-   
 2. **API restrictions**:
    - Select "Restrict key"
    - Enable only these APIs:
@@ -55,6 +59,7 @@ GEMINI_API_KEY=your_new_gemini_key_here
      - Places API (if using autocomplete)
 
 #### For Gemini API Key:
+
 1. Set usage limits
 2. Monitor usage regularly
 3. Consider IP restrictions if applicable
@@ -72,12 +77,14 @@ GEMINI_API_KEY=your_new_gemini_key_here
 ### For Android (Recommended)
 
 1. Create `android/local.properties` (already in .gitignore):
+
 ```properties
 # Android local properties
 GOOGLE_MAPS_API_KEY=your_actual_key_here
 ```
 
 2. Update `android/app/build.gradle`:
+
 ```gradle
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
@@ -97,6 +104,7 @@ android {
 ```
 
 3. Update `AndroidManifest.xml`:
+
 ```xml
 <meta-data
     android:name="com.google.android.geo.API_KEY"
@@ -106,11 +114,13 @@ android {
 ## 🔍 Check If Your Keys Were Compromised
 
 1. **Check Google Cloud Console**:
+
    - Go to "APIs & Services" → "Credentials"
    - Click on your API key
    - Check "API key requests" for unusual activity
 
 2. **Check Gemini API Usage**:
+
    - Go to [Google AI Studio](https://ai.google.dev/)
    - Review usage statistics
    - Look for unexpected spikes
@@ -124,6 +134,7 @@ android {
 ### Git Hooks (Recommended)
 
 Create `.git/hooks/pre-commit`:
+
 ```bash
 #!/bin/sh
 # Check for API keys before committing
@@ -138,6 +149,7 @@ exit 0
 ```
 
 Make it executable:
+
 ```bash
 chmod +x .git/hooks/pre-commit
 ```
@@ -145,6 +157,7 @@ chmod +x .git/hooks/pre-commit
 ### Use GitHub Secret Scanning
 
 GitHub automatically scans for exposed secrets. Make sure it's enabled:
+
 1. Go to your repository → Settings → Security
 2. Enable "Secret scanning"
 3. Enable "Push protection"
