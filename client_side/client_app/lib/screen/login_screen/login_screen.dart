@@ -3,7 +3,6 @@ import '../../utility/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
 import '../home_screen.dart';
-import 'otp_verification_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -12,23 +11,21 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return FlutterLogin(
       messages: LoginMessages(
-        userHint: 'Email / Username / Phone',
+        userHint: 'Email / Username',
         passwordHint: 'Password',
       ),
-      loginAfterSignUp: false,
+      loginAfterSignUp: true, // Auto-login after signup
       logo: const AssetImage('assets/images/logo.png'),
       onLogin: (LoginData loginData) => context.userProvider.login(loginData),
       onSignup: (SignupData data) async {
-        final err = await context.userProvider.register(data);
-        if (err == null && context.mounted) {
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const OtpVerificationScreen()),
-          );
-        }
-        return err;
+        return await context.userProvider.register(data);
       },
-      additionalSignupFields: const [
-        UserFormField(keyName: 'phone', displayName: 'Phone number'),
+      additionalSignupFields: [
+        UserFormField(
+          keyName: 'name',
+          displayName: 'Full Name',
+          icon: Icon(Icons.person),
+        ),
       ],
       onSubmitAnimationCompleted: () {
         if (context.userProvider.getLoginUsr()?.sId != null) {
@@ -45,18 +42,10 @@ class LoginScreen extends StatelessWidget {
           ));
         }
       },
-      // Use recover button as "Login via OTP" path
-      onRecoverPassword: (String phone) async {
-        final err = await context.userProvider.requestOtp(phone);
-        if (err == null && context.mounted) {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-                builder: (_) => OtpVerificationScreen(phone: phone)),
-          );
-        }
-        return err;
+      onRecoverPassword: (String email) async {
+        return await context.userProvider.recoverPassword(email);
       },
-      hideForgotPasswordButton: true,
+      hideForgotPasswordButton: false,
       theme: LoginTheme(
           primaryColor: AppColor.darkGrey,
           accentColor: AppColor.darkOrange,

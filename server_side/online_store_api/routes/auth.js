@@ -114,12 +114,17 @@ function validatePassword(password) {
   return { valid: true };
 }
 
-// Register with password + phone; requires OTP verification after
+// Register with email/username + password (no phone verification required)
 router.post('/register', asyncHandler(async (req, res) => {
-  let { username, email, phone, password } = req.body || {};
-  if (!username && !email) return res.status(400).json({ success: false, message: 'username or email is required' });
-  if (!phone) return res.status(400).json({ success: false, message: 'phone is required' });
-  if (!password) return res.status(400).json({ success: false, message: 'password is required' });
+  let { username, email, password, name } = req.body || {};
+  
+  // Require either username or email
+  if (!username && !email) {
+    return res.status(400).json({ success: false, message: 'username or email is required' });
+  }
+  if (!password) {
+    return res.status(400).json({ success: false, message: 'password is required' });
+  }
 
   // Validate password strength
   const passwordValidation = validatePassword(password);
@@ -129,37 +134,51 @@ router.post('/register', asyncHandler(async (req, res) => {
 
   username = username?.toLowerCase();
   email = email?.toLowerCase();
-  const normalizedPhone = normalizePhone(phone);
-  if (!normalizedPhone) return res.status(400).json({ success: false, message: 'Phone must include country code like +919012345678 or set DEFAULT_COUNTRY_CODE' });
 
-  // If phone already exists, treat as login via OTP
-  const existingByPhone = await User.findOne({ $or: [{ phone }, { phone: normalizedPhone }] });
-  if (existingByPhone) {
-    const result = await sendOtpWithFallback({ user: existingByPhone, phone: normalizedPhone, purpose: 'login' });
-    if (!result.ok) return res.status(400).json({ success: false, message: result.message });
-    return res.json({ success: true, message: 'Phone already registered. OTP sent for login.', data: null });
+  // Check for duplicate username/email
+  const existingUser = await User.findOne({ 
+    $or: [ 
+      username ? { username } : null, 
+      email ? { email } : null 
+    ].filter(Boolean) 
+  });
+  
+  if (existingUser) {
+    return res.status(409).json({ 
+      success: false, 
+      message: 'Username or email already in use' 
+    });
   }
 
-  // Block duplicate username/email if used by someone else
-  const existingById = await User.findOne({ $or: [ { username }, { email } ] });
-  if (existingById) return res.status(409).json({ success: false, message: 'Username or email already in use' });
-
-  const passwordHash = await bcrypt.hash(password, 12); // Increased salt rounds
+  const passwordHash = await bcrypt.hash(password, 12);
   const user = await User.create({ 
     username, 
     email, 
-    phone: normalizedPhone, 
+    name,
     passwordHash, 
-    isPhoneVerified: false,
+    isPhoneVerified: true, // Set to true since we're not verifying phone
+    isEmailVerified: false,
     tokenVersion: 0
   });
 
-  // Create OTP for signup
-  {
-  const result = await sendOtpWithFallback({ user, phone: normalizedPhone, purpose: 'signup' });
-    if (!result.ok) return res.status(400).json({ success: false, message: result.message });
-  }
-  return res.json({ success: true, message: 'Registered. OTP sent to phone for verification.', data: null });
+  // Automatically log the user in after registration
+  const tokens = signTokens(user);
+  
+  return res.json({ 
+    success: true, 
+    message: 'Registration successful! You are now logged in.', 
+    data: { 
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        name: user.name,
+        role: user.role
+      },
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken
+    } 
+  });
 }));
 
 // Verify OTP (signup/login)
