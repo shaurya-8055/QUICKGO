@@ -3,19 +3,18 @@ import 'package:http/http.dart' as http;
 import 'package:get_storage/get_storage.dart';
 
 class ApiService {
-  // Change this to your server URL
-  // For Android Emulator (RECOMMENDED for testing)
-  static const String baseUrl = 'http://10.0.2.2:5000/api';
+  // Production server URL (Deployed on Render)
+  static const String baseUrl = 'https://quickgo-tpum.onrender.com';
 
-  // For iOS Simulator
-  // static const String baseUrl = 'http://localhost:5000/api';
+  // For local testing with Android Emulator (uncomment when testing locally)
+  // static const String baseUrl = 'http://10.0.2.2:5000';
+
+  // For iOS Simulator (local testing)
+  // static const String baseUrl = 'http://localhost:5000';
 
   // For physical device: Use your computer's IP address
   // Find your IP: Run 'ipconfig' in PowerShell, look for IPv4 Address
-  // static const String baseUrl = 'http://192.168.1.100:5000/api';
-
-  // For production
-  // static const String baseUrl = 'https://your-domain.com/api';
+  // static const String baseUrl = 'http://192.168.1.100:5000';
 
   final _storage = GetStorage();
 
@@ -39,7 +38,7 @@ class ApiService {
   }) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/auth/worker/signup'),
+        Uri.parse('$baseUrl/worker-auth/register'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'phone': phone,
@@ -63,7 +62,7 @@ class ApiService {
   }) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/auth/worker/login'),
+        Uri.parse('$baseUrl/worker-auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'phone': phone,
@@ -85,7 +84,7 @@ class ApiService {
   }) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/auth/customer/signup'),
+        Uri.parse('$baseUrl/auth/register'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'phone': phone,
@@ -107,7 +106,7 @@ class ApiService {
   }) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/auth/customer/login'),
+        Uri.parse('$baseUrl/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'phone': phone,
@@ -125,7 +124,7 @@ class ApiService {
   Future<Map<String, dynamic>> getWorkerProfile() async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/workers/profile'),
+        Uri.parse('$baseUrl/worker-auth/me'),
         headers: headers,
       );
 
@@ -139,7 +138,7 @@ class ApiService {
       Map<String, dynamic> data) async {
     try {
       final response = await http.put(
-        Uri.parse('$baseUrl/workers/profile'),
+        Uri.parse('$baseUrl/worker-auth/profile'),
         headers: headers,
         body: jsonEncode(data),
       );
@@ -153,7 +152,7 @@ class ApiService {
   Future<Map<String, dynamic>> toggleAvailability(bool isAvailable) async {
     try {
       final response = await http.put(
-        Uri.parse('$baseUrl/workers/availability'),
+        Uri.parse('$baseUrl/worker-auth/availability'),
         headers: headers,
         body: jsonEncode({'isAvailable': isAvailable}),
       );
@@ -168,7 +167,7 @@ class ApiService {
       double longitude, double latitude) async {
     try {
       final response = await http.put(
-        Uri.parse('$baseUrl/workers/location'),
+        Uri.parse('$baseUrl/worker-auth/location'),
         headers: headers,
         body: jsonEncode({
           'longitude': longitude,
