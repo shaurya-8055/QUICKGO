@@ -2,6 +2,7 @@ import '../../../utility/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+
 class SideMenu extends StatelessWidget {
   const SideMenu({
     Key? key,
@@ -90,13 +91,6 @@ class SideMenu extends StatelessWidget {
             svgSrc: "assets/icons/menu_task.svg",
             press: () {
               context.mainScreenProvider.navigateToScreen('ServiceRequests');
-            },
-          ),
-          DrawerListTile(
-            title: "Technicians",
-            svgSrc: "assets/icons/menu_profile.svg",
-            press: () {
-              context.mainScreenProvider.navigateToScreen('Technicians');
             },
           ),
         ],

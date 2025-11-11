@@ -4,10 +4,19 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const asyncHandler = require('express-async-handler');
 const dotenv = require('dotenv');
-const { seedTechnicians } = require('./util/seedTechnicians');
+// const { seedTechnicians } = require('./util/seedTechnicians');
 dotenv.config();
 
 const app = express();
+ const URL = process.env.MONGO_URL;
+mongoose.connect(URL);
+const db = mongoose.connection;
+db.on('error', (error) => console.error(error));
+db.once('open', async () => {
+    console.log('Connected to Database');
+    // Seed technicians if none exist
+    // await seedTechnicians();
+});
 // CORS: reflect origin and allow PATCH/OPTIONS with common headers
 const corsOptions = {
     origin: true,
@@ -40,20 +49,15 @@ app.use((req, res, next) => {
     }
     next();
 });
+app.get("/", (req, res) => {
+    res.send("helloo test")
+})
 //? setting static folder path
 app.use('/image/products', express.static('public/products'));
 app.use('/image/category', express.static('public/category'));
 app.use('/image/poster', express.static('public/posters'));
 
-const URL = process.env.MONGO_URL;
-mongoose.connect(URL);
-const db = mongoose.connection;
-db.on('error', (error) => console.error(error));
-db.once('open', async () => {
-    console.log('Connected to Database');
-    // Seed technicians if none exist
-    await seedTechnicians();
-});
+
 
 // Routes
 app.use('/categories', require('./routes/category'));

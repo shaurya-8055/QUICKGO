@@ -244,4 +244,3 @@ Respond in JSON:
     });
     return sorted;
   }
-}
