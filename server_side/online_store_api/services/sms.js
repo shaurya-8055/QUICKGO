@@ -1,24 +1,22 @@
-const axios = require('axios');
+// services/sms.js
+const twilio = require('twilio');
 
-/**
- * Pluggable SMS sender.
- * In production, replace the implementation with your SMS gateway HTTP API.
- * Export a single function sendSms(phone, message) that resolves true/false.
- */
-async function sendSms(phone, message) {
+// optional: use env vars TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE
+const client = new twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+
+async function sendSMS(to, message) {
   try {
-    // Example placeholder: log only. Replace with real SMS provider.
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`[DEV SMS] to ${phone}: ${message}`);
-      return true;
-    }
-    // Example generic POST if you have a gateway:
-    // await axios.post(process.env.SMS_API_URL, { to: phone, message, apiKey: process.env.SMS_API_KEY });
-    return true;
-  } catch (e) {
-    console.error('SMS send failed', e.message);
-    return false;
+    const res = await client.messages.create({
+      body: message,
+      from: process.env.TWILIO_PHONE,
+      to,
+    });
+    console.log('SMS sent:', res.sid);
+    return res.sid;
+  } catch (err) {
+    console.error('SMS sending failed:', err.message);
+    throw err;
   }
 }
 
-module.exports = { sendSms };
+module.exports = sendSMS;
