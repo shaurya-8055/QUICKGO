@@ -8,14 +8,46 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const app = express();
- const URL = process.env.MONGO_URL;
-mongoose.connect(URL);
-const db = mongoose.connection;
-db.on('error', (error) => console.error(error));
-db.once('open', async () => {
-    console.log('Connected to Database');
-    // Seed technicians if none exist
-    // await seedTechnicians();
+
+// Enhanced MongoDB connection with better error handling
+const connectDB = async () => {
+    try {
+        const mongoUrl = process.env.MONGO_URL;
+        if (!mongoUrl) {
+            throw new Error('MONGO_URL environment variable is not defined');
+        }
+        
+        await mongoose.connect(mongoUrl, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        });
+        
+        console.log('✅ Connected to MongoDB Database');
+        // Seed technicians if none exist
+        // await seedTechnicians();
+    } catch (error) {
+        console.error('❌ MongoDB connection error:', error.message);
+        process.exit(1);
+    }
+};
+
+// Connect to database
+connectDB();
+
+// Handle mongoose connection events
+mongoose.connection.on('error', (error) => {
+    console.error('MongoDB connection error:', error);
+});
+
+mongoose.connection.on('disconnected', () => {
+    console.log('MongoDB disconnected');
+});
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+    await mongoose.connection.close();
+    console.log('MongoDB connection closed.');
+    process.exit(0);
 });
 // CORS: reflect origin and allow PATCH/OPTIONS with common headers
 const corsOptions = {
