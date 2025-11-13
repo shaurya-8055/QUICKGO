@@ -460,7 +460,7 @@ class _ServiceActionDialogState extends State<ServiceActionDialog> {
 
       try {
         final (success, message) =
-            await context.read<ServiceProvider>().updateServiceRequest(
+            await context.read<ServiceProvider>().updateStatus(
                   id: widget.serviceRequest.sId!,
                   status: _statusValue,
                   assigneeId: _selectedTechnician?.sId,
@@ -469,7 +469,6 @@ class _ServiceActionDialogState extends State<ServiceActionDialog> {
                   notes: _notesController.text.trim().isEmpty
                       ? null
                       : _notesController.text.trim(),
-                  context: context, // Pass context for automatic data refresh
                 );
 
         if (success) {
