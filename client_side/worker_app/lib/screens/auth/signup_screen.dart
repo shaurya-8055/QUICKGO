@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import 'otp_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -64,15 +65,18 @@ class _SignupScreenState extends State<SignupScreen> {
     setState(() => _isLoading = true);
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final email = _emailController.text.trim();
 
     final success = await authProvider.signup(
-      phone: _phoneController.text.trim(),
+      email: email,
       name: _nameController.text.trim(),
       password: _passwordController.text,
-      email: _emailController.text.trim().isEmpty
+      // Backend takes a single primaryCategory; remaining selections are skills.
+      primaryCategory: _selectedServices.first,
+      skills: _selectedServices,
+      phone: _phoneController.text.trim().isEmpty
           ? null
-          : _emailController.text.trim(),
-      serviceType: _selectedServices,
+          : _phoneController.text.trim(),
       city: _cityController.text.trim().isEmpty
           ? null
           : _cityController.text.trim(),
@@ -82,10 +86,11 @@ class _SignupScreenState extends State<SignupScreen> {
 
     if (mounted) {
       if (success) {
-        // Navigate to home screen
-        Navigator.of(context).pushReplacementNamed('/home');
+        // Account created; verify the email OTP before logging in.
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (_) => OtpScreen(email: email),
+        ));
       } else {
-        // Show error
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(authProvider.errorMessage ?? 'Signup failed'),
@@ -162,7 +167,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     controller: _phoneController,
                     keyboardType: TextInputType.phone,
                     decoration: InputDecoration(
-                      labelText: 'Phone Number *',
+                      labelText: 'Phone Number (Optional)',
                       hintText: '+91 9876543210',
                       prefixIcon: const Icon(Icons.phone),
                       border: OutlineInputBorder(
@@ -172,26 +177,22 @@ class _SignupScreenState extends State<SignupScreen> {
                       fillColor: Colors.grey[50],
                     ),
                     validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter phone number';
-                      }
-                      if (!value.contains('+')) {
-                        return 'Please include country code (e.g., +91)';
-                      }
-                      if (value.length < 12) {
-                        return 'Please enter valid phone number';
+                      if (value != null &&
+                          value.isNotEmpty &&
+                          !value.contains('+')) {
+                        return 'Include country code (e.g., +91) or leave empty';
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 16),
 
-                  // Email (Optional)
+                  // Email (Required — used for verification & login)
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                      labelText: 'Email (Optional)',
+                      labelText: 'Email *',
                       hintText: 'your@email.com',
                       prefixIcon: const Icon(Icons.email),
                       border: OutlineInputBorder(
@@ -201,10 +202,12 @@ class _SignupScreenState extends State<SignupScreen> {
                       fillColor: Colors.grey[50],
                     ),
                     validator: (value) {
-                      if (value != null &&
-                          value.isNotEmpty &&
-                          !value.contains('@')) {
-                        return 'Please enter valid email';
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter your email';
+                      }
+                      final re = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
+                      if (!re.hasMatch(value.trim())) {
+                        return 'Please enter a valid email';
                       }
                       return null;
                     },

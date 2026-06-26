@@ -40,10 +40,18 @@ String getMainUrl() {
   // }
 }
 
+// Google OAuth Web client ID (used as serverClientId so the backend can verify
+// the ID token). Pass at build time with:
+//   flutter build apk --dart-define=GOOGLE_WEB_CLIENT_ID=xxxxx.apps.googleusercontent.com
+// On web, also add the same value as a <meta name="google-signin-client_id"> in web/index.html.
+const String GOOGLE_WEB_CLIENT_ID =
+    String.fromEnvironment('GOOGLE_WEB_CLIENT_ID', defaultValue: '');
+
 const FAVORITE_PRODUCT_BOX = 'FAVORITE_PRODUCT_BOX';
 const USER_INFO_BOX = 'USER_INFO_BOX';
 const AUTH_TOKEN_BOX = 'AUTH_TOKEN_BOX';
 const PENDING_OTP_PHONE = 'PENDING_OTP_PHONE';
+const PENDING_OTP_EMAIL = 'PENDING_OTP_EMAIL';
 
 const PHONE_KEY = 'PHONE_KEY';
 const STREET_KEY = 'STREET_KEY';

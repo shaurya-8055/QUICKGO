@@ -4,9 +4,9 @@ const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 const rateLimit = require('express-rate-limit');
 const User = require('../model/user');
-// const { generateOtp, hashOtp, verifyOtp } = require('../util/otp');
-const { sendSms } = require('../services/sms');
-const { hasTwilioEnv, sendVerification, checkVerification } = require('../services/twilioVerify');
+const { generateOtp, hashOtp, verifyOtp } = require('../util/otp');
+const { sendOtpEmail, sendEmail } = require('../services/email');
+const { verifyGoogleIdToken } = require('../services/googleAuth');
 const { auth } = require('../middleware/auth');
 const crypto = require('crypto');
 
@@ -17,32 +17,6 @@ function normalizePhone(raw) {
   const cc = process.env.DEFAULT_COUNTRY_CODE; // e.g. +91
   if (cc) return `${cc}${p}`;
   return null; // require E.164 when no default is set
-}
-
-async function sendOtpWithFallback({ user, phone, purpose }) {
-  const to = normalizePhone(phone);
-  if (!to) {
-    return { ok: false, message: 'Phone must include country code like +919012345678 or set DEFAULT_COUNTRY_CODE in .env' };
-  }
-  if (hasTwilioEnv()) {
-    try {
-    const resp = await sendVerification(to);
-    console.log(`[OTP][Twilio] Sent verification to ${to} purpose=${purpose} status=${resp?.status}`);
-    return { ok: true };
-    } catch (e) {
-    console.error(`[OTP][Twilio][ERROR] to ${to} purpose=${purpose}:`, e?.status || '', e?.code || '', e?.message || e);
-      // fall through to local OTP
-    }
-  }
-  // Local OTP fallback
-  const otp = generateOtp();
-  if (user) {
-    user.otp = { codeHash: await hashOtp(otp), purpose, expiresAt: new Date(Date.now() + 10 * 60 * 1000) };
-    await user.save();
-  }
-  console.log(`[OTP][Local] Generated fallback OTP for ${to} purpose=${purpose}`);
-  await sendSms(to, `Your ${purpose} code is ${otp}`);
-  return { ok: true, fallback: true };
 }
 
 const router = express.Router();
@@ -181,71 +155,125 @@ router.post('/register', asyncHandler(async (req, res) => {
   });
 }));
 
-// Verify OTP (signup/login)
-router.post('/verify-otp', otpLimiter, asyncHandler(async (req, res) => {
-  const { phone, code } = req.body || {};
-  if (!phone || !code) return res.status(400).json({ success: false, message: 'phone and code required' });
+// ---------------------------------------------------------------------------
+// Email OTP authentication (passwordless). Replaces the old phone/SMS OTP flow.
+// Unified login+signup: requesting a code for a new email creates a shell user.
+// ---------------------------------------------------------------------------
 
-  const to = normalizePhone(phone);
-  if (!to) return res.status(400).json({ success: false, message: 'Phone must include country code like +919012345678 or set DEFAULT_COUNTRY_CODE in .env' });
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
 
-  if (hasTwilioEnv()) {
-    const result = await checkVerification(to, code);
-    if (result.status !== 'approved') return res.status(400).json({ success: false, message: 'Invalid OTP' });
-    const user = await User.findOne({ $or: [{ phone }, { phone: to }] });
-    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-    user.isPhoneVerified = true;
-    user.otp = undefined;
-    await user.save();
-    const tokens = signTokens(user);
-    return res.json({ 
-      success: true, 
-      message: 'OTP verified', 
-      data: { 
-        user, 
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken 
-      } 
-    });
+// Request an email OTP (creates the account if it doesn't exist yet).
+router.post('/email/request-otp', otpLimiter, asyncHandler(async (req, res) => {
+  let { email, name } = req.body || {};
+  if (!email) return res.status(400).json({ success: false, message: 'email is required' });
+  email = String(email).toLowerCase().trim();
+  if (!isValidEmail(email)) return res.status(400).json({ success: false, message: 'A valid email is required' });
+
+  let user = await User.findOne({ email });
+  const isNew = !user;
+  if (!user) {
+    user = await User.create({ email, name, isEmailVerified: false, tokenVersion: 0 });
   }
 
-  const user = await User.findOne({ $or: [{ phone }, { phone: to }] });
-  if (!user || !user.otp || !user.otp.codeHash) {
-    return res.status(400).json({ success: false, message: 'No OTP pending' });
-  }
-  if (user.otp.expiresAt && user.otp.expiresAt < new Date()) {
-    user.otp = undefined; await user.save();
-    return res.status(400).json({ success: false, message: 'OTP expired' });
-  }
-  const ok = await verifyOtp(code, user.otp.codeHash);
-  if (!ok) return res.status(400).json({ success: false, message: 'Invalid OTP' });
-  user.isPhoneVerified = true;
-  user.otp = undefined;
+  const otp = generateOtp();
+  user.otp = {
+    codeHash: await hashOtp(otp),
+    purpose: isNew ? 'signup' : 'login',
+    expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+  };
   await user.save();
-  const tokens = signTokens(user);
-  return res.json({ 
-    success: true, 
-    message: 'OTP verified', 
-    data: { 
-      user, 
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken 
-    } 
+
+  const result = await sendOtpEmail(email, otp, isNew ? 'signup' : 'login');
+  if (!result.ok) return res.status(502).json({ success: false, message: 'Failed to send verification email' });
+
+  return res.json({
+    success: true,
+    message: 'Verification code sent to your email',
+    data: { isNewUser: isNew },
   });
 }));
 
-// Request OTP for login (phone only)
-router.post('/request-otp', otpLimiter, asyncHandler(async (req, res) => {
-  const { phone } = req.body || {};
-  if (!phone) return res.status(400).json({ success: false, message: 'phone required' });
-  const to = normalizePhone(phone);
-  if (!to) return res.status(400).json({ success: false, message: 'Phone must include country code like +919012345678 or set DEFAULT_COUNTRY_CODE' });
-  const user = await User.findOne({ $or: [{ phone }, { phone: to }] });
-  if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-  const result = await sendOtpWithFallback({ user, phone: to, purpose: 'login' });
-  if (!result.ok) return res.status(400).json({ success: false, message: result.message });
-  return res.json({ success: true, message: 'OTP sent', data: null });
+// Verify an email OTP and return auth tokens.
+router.post('/email/verify-otp', otpLimiter, asyncHandler(async (req, res) => {
+  let { email, code } = req.body || {};
+  if (!email || !code) return res.status(400).json({ success: false, message: 'email and code are required' });
+  email = String(email).toLowerCase().trim();
+
+  const user = await User.findOne({ email });
+  if (!user || !user.otp || !user.otp.codeHash) {
+    return res.status(400).json({ success: false, message: 'No verification code pending. Request a new one.' });
+  }
+  if (user.otp.expiresAt && user.otp.expiresAt < new Date()) {
+    user.otp = undefined; await user.save();
+    return res.status(400).json({ success: false, message: 'Verification code expired. Request a new one.' });
+  }
+  const ok = await verifyOtp(String(code), user.otp.codeHash);
+  if (!ok) return res.status(400).json({ success: false, message: 'Invalid verification code' });
+
+  user.isEmailVerified = true;
+  user.otp = undefined;
+  user.lastLoginAt = new Date();
+  await user.save();
+
+  const tokens = signTokens(user);
+  return res.json({
+    success: true,
+    message: 'Email verified',
+    data: { user, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken },
+  });
 }));
+
+// Sign in with Google: verify the ID token from the client and issue our tokens.
+router.post('/google', loginLimiter, asyncHandler(async (req, res) => {
+  const { idToken } = req.body || {};
+  if (!idToken) return res.status(400).json({ success: false, message: 'idToken is required' });
+
+  let profile;
+  try {
+    profile = await verifyGoogleIdToken(idToken);
+  } catch (e) {
+    console.error('[GoogleAuth] verify failed:', e.message);
+    return res.status(401).json({ success: false, message: 'Invalid Google token' });
+  }
+
+  // Find by googleId, otherwise link to an existing account with the same email.
+  let user = await User.findOne({ $or: [{ googleId: profile.googleId }, { email: profile.email }] });
+  if (!user) {
+    user = await User.create({
+      googleId: profile.googleId,
+      email: profile.email,
+      name: profile.name,
+      avatar: profile.avatar,
+      isEmailVerified: profile.emailVerified,
+      tokenVersion: 0,
+    });
+  } else {
+    // Link Google to an existing email-based account on first Google login.
+    if (!user.googleId) user.googleId = profile.googleId;
+    if (!user.avatar && profile.avatar) user.avatar = profile.avatar;
+    if (!user.name && profile.name) user.name = profile.name;
+    if (profile.emailVerified) user.isEmailVerified = true;
+    user.lastLoginAt = new Date();
+    await user.save();
+  }
+
+  const tokens = signTokens(user);
+  return res.json({
+    success: true,
+    message: 'Google sign-in successful',
+    data: { user, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken },
+  });
+}));
+
+// Deprecated phone/SMS OTP endpoints (mobile OTP has been removed).
+router.post(['/request-otp', '/verify-otp'], (req, res) => {
+  return res.status(410).json({
+    success: false,
+    message: 'Phone OTP is no longer supported. Use email OTP (/auth/email/request-otp) or Google sign-in (/auth/google).',
+  });
+});
 
 // Password login with username/email/phone + password
 router.post('/login', strictLoginLimiter, asyncHandler(async (req, res) => {
@@ -401,15 +429,16 @@ router.post('/forgot-password', passwordResetLimiter, asyncHandler(async (req, r
   user.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
   await user.save();
 
-  // Here you would send email with reset token
-  // For now, just log it (in production, send email)
-  console.log(`Password reset token for ${email}: ${resetToken}`);
-  
-  res.json({ 
-    success: true, 
-    message: 'Password reset instructions sent to email',
-    // Remove this in production
-    debug: process.env.NODE_ENV === 'development' ? { resetToken } : undefined
+  // Email the reset token to the user (never return it in the response).
+  await sendEmail({
+    to: user.email,
+    subject: 'QuickGo password reset',
+    text: `Use this code to reset your password: ${resetToken}\nIt expires in 10 minutes. If you didn't request this, ignore this email.`,
+  });
+
+  res.json({
+    success: true,
+    message: 'If the email exists, password reset instructions have been sent',
   });
 }));
 

@@ -9,30 +9,46 @@ dotenv.config();
 
 const app = express();
 
-// Enhanced MongoDB connection with better error handling
-const connectDB = async () => {
+// Enhanced MongoDB connection with retry/backoff.
+// We deliberately do NOT process.exit() on failure: that caused the server to
+// crash-loop on Render whenever the Atlas host was unreachable. Instead we keep
+// the HTTP server up (so health checks respond) and retry the connection.
+const connectDB = async (attempt = 1) => {
+    const mongoUrl = process.env.MONGO_URL;
+    if (!mongoUrl) {
+        console.error('❌ MONGO_URL environment variable is not defined. Set it in your .env / host env vars.');
+        return; // nothing to retry until it's configured
+    }
+
     try {
-        const mongoUrl = process.env.MONGO_URL;
-        if (!mongoUrl) {
-            throw new Error('MONGO_URL environment variable is not defined');
-        }
-        
+        console.log(`🔄 Attempting to connect to MongoDB (attempt ${attempt})...`);
+        console.log('Connection URL:', mongoUrl.replace(/:[^:@]+@/, ':****@')); // Hide password in logs
+
         await mongoose.connect(mongoUrl, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
+            serverSelectionTimeoutMS: 5000,
+            socketTimeoutMS: 45000,
         });
-        
+
         console.log('✅ Connected to MongoDB Database');
-        // Seed technicians if none exist
-        // await seedTechnicians();
+        console.log('Database:', mongoose.connection.name);
     } catch (error) {
-        console.error('❌ MongoDB connection error:', error.message);
-        process.exit(1);
+        const delay = Math.min(30000, 2000 * attempt); // backoff, capped at 30s
+        console.error(`❌ MongoDB connection error: ${error.message}`);
+        if (error.code === 'ENOTFOUND' || /querySrv/.test(error.message || '')) {
+            console.error('   The cluster host could not be resolved. Verify MONGO_URL points to a live Atlas cluster.');
+        }
+        console.error(`   Retrying in ${Math.round(delay / 1000)}s...`);
+        setTimeout(() => connectDB(attempt + 1), delay);
     }
 };
 
-// Connect to database
+// Connect to database (non-blocking; retries in the background)
 connectDB();
+
+// Prevent a rejected SRV/connection promise from crashing the whole process.
+process.on('unhandledRejection', (reason) => {
+    console.error('Unhandled promise rejection:', reason && reason.message ? reason.message : reason);
+});
 
 // Handle mongoose connection events
 mongoose.connection.on('error', (error) => {

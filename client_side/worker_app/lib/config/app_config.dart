@@ -3,12 +3,20 @@ class AppConfig {
   static const String appVersion = '1.0.0';
 
   // API Configuration
-  static const String baseUrl = 'http://localhost:3000';
+  // NOTE: the live API base URL lives in ApiService.baseUrl; this is kept in sync.
+  static const String baseUrl = 'https://quickgo-tpum.onrender.com';
   static const String apiVersion = 'v1';
 
+  // Google OAuth Web client ID (serverClientId for the backend to verify tokens).
+  // Pass at build: flutter build apk --dart-define=GOOGLE_WEB_CLIENT_ID=xxx.apps.googleusercontent.com
+  static const String googleWebClientId =
+      String.fromEnvironment('GOOGLE_WEB_CLIENT_ID', defaultValue: '');
+
   // Endpoints
-  static const String loginEndpoint = '/auth/worker/login';
-  static const String verifyOtpEndpoint = '/auth/worker/verify-otp';
+  static const String loginEndpoint = '/worker-auth/login';
+  static const String requestEmailOtpEndpoint = '/worker-auth/email/request-otp';
+  static const String verifyOtpEndpoint = '/worker-auth/email/verify-otp';
+  static const String googleEndpoint = '/worker-auth/google';
   static const String jobsEndpoint = '/worker/jobs';
   static const String earningsEndpoint = '/worker/earnings';
   static const String profileEndpoint = '/worker/profile';
