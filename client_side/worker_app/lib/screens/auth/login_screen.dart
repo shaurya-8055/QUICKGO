@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import 'signup_screen.dart';
+import 'otp_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,46 +13,80 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _phoneController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _isLoading = false;
 
   @override
   void dispose() {
-    _phoneController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
+  String? _validateEmail(String? value) {
+    if (value == null || value.trim().isEmpty) return 'Please enter your email';
+    final re = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
+    if (!re.hasMatch(value.trim())) return 'Enter a valid email';
+    return null;
+  }
+
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
-
     setState(() => _isLoading = true);
-
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-
     final success = await authProvider.login(
-      phone: _phoneController.text.trim(),
+      identifier: _emailController.text.trim(),
       password: _passwordController.text,
     );
-
     setState(() => _isLoading = false);
-
-    if (mounted) {
-      if (success) {
-        // Navigate to home screen
-        Navigator.of(context).pushReplacementNamed('/home');
-      } else {
-        // Show error
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(authProvider.errorMessage ?? 'Login failed'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+    if (!mounted) return;
+    if (success) {
+      Navigator.of(context).pushReplacementNamed('/home');
+    } else {
+      _showError(authProvider.errorMessage ?? 'Login failed');
     }
+  }
+
+  // Send an email OTP and go to the verification screen.
+  Future<void> _handleEmailOtp() async {
+    final email = _emailController.text.trim();
+    if (_validateEmail(email) != null) {
+      _showError('Enter a valid email to receive a code');
+      return;
+    }
+    setState(() => _isLoading = true);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final sent = await authProvider.requestEmailOtp(email);
+    setState(() => _isLoading = false);
+    if (!mounted) return;
+    if (sent) {
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => OtpScreen(email: email),
+      ));
+    } else {
+      _showError(authProvider.errorMessage ?? 'Could not send code');
+    }
+  }
+
+  Future<void> _handleGoogle() async {
+    setState(() => _isLoading = true);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final success = await authProvider.signInWithGoogle();
+    setState(() => _isLoading = false);
+    if (!mounted) return;
+    if (success) {
+      Navigator.of(context).pushReplacementNamed('/home');
+    } else {
+      _showError(authProvider.errorMessage ?? 'Google sign-in failed');
+    }
+  }
+
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), backgroundColor: Colors.red),
+    );
   }
 
   @override
@@ -68,59 +103,38 @@ class _LoginScreenState extends State<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 40),
-
-                  // Logo and Title
-                  Icon(
-                    Icons.handyman_rounded,
-                    size: 80,
-                    color: Colors.blue[700],
-                  ),
+                  Icon(Icons.handyman_rounded, size: 80, color: Colors.blue[700]),
                   const SizedBox(height: 24),
-
                   Text(
                     'Worker Login',
                     style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
-                    ),
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[800]),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
-
                   Text(
                     'Sign in to manage your jobs',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 48),
 
-                  // Phone Number Field
+                  // Email Field
                   TextFormField(
-                    controller: _phoneController,
-                    keyboardType: TextInputType.phone,
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                      labelText: 'Phone Number',
-                      hintText: '+91 9876543210',
-                      prefixIcon: const Icon(Icons.phone),
+                      labelText: 'Email',
+                      hintText: 'you@example.com',
+                      prefixIcon: const Icon(Icons.email_outlined),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                          borderRadius: BorderRadius.circular(12)),
                       filled: true,
                       fillColor: Colors.grey[50],
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter phone number';
-                      }
-                      if (!value.contains('+')) {
-                        return 'Please include country code (e.g., +91)';
-                      }
-                      return null;
-                    },
+                    validator: _validateEmail,
                   ),
                   const SizedBox(height: 16),
 
@@ -133,20 +147,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       hintText: 'Enter your password',
                       prefixIcon: const Icon(Icons.lock),
                       suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
+                        icon: Icon(_obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility),
+                        onPressed: () => setState(
+                            () => _obscurePassword = !_obscurePassword),
                       ),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                          borderRadius: BorderRadius.circular(12)),
                       filled: true,
                       fillColor: Colors.grey[50],
                     ),
@@ -165,8 +173,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                          borderRadius: BorderRadius.circular(12)),
                       backgroundColor: Colors.blue[700],
                       disabledBackgroundColor: Colors.grey[300],
                     ),
@@ -180,16 +187,21 @@ class _LoginScreenState extends State<LoginScreen> {
                                   AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
-                        : const Text(
-                            'Login',
+                        : const Text('Login',
                             style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white)),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 12),
+
+                  // Email OTP (passwordless) button
+                  TextButton.icon(
+                    onPressed: _isLoading ? null : _handleEmailOtp,
+                    icon: const Icon(Icons.mark_email_read_outlined),
+                    label: const Text('Email me a login code'),
+                  ),
+                  const SizedBox(height: 8),
 
                   // Divider
                   Row(
@@ -197,65 +209,52 @@ class _LoginScreenState extends State<LoginScreen> {
                       Expanded(child: Divider(color: Colors.grey[400])),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text(
-                          'OR',
-                          style: TextStyle(color: Colors.grey[600]),
-                        ),
+                        child:
+                            Text('OR', style: TextStyle(color: Colors.grey[600])),
                       ),
                       Expanded(child: Divider(color: Colors.grey[400])),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
+
+                  // Continue with Google
+                  OutlinedButton.icon(
+                    onPressed: _isLoading ? null : _handleGoogle,
+                    icon: Image.network(
+                      'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
+                      height: 20,
+                      width: 20,
+                      errorBuilder: (_, __, ___) =>
+                          const Icon(Icons.login, size: 20),
+                    ),
+                    label: const Text('Continue with Google'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      side: BorderSide(color: Colors.grey[400]!),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
 
                   // Sign Up Button
                   OutlinedButton(
                     onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const SignupScreen(),
-                        ),
-                      );
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => const SignupScreen(),
+                      ));
                     },
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                          borderRadius: BorderRadius.circular(12)),
                       side: BorderSide(color: Colors.blue[700]!),
                     ),
-                    child: Text(
-                      'Create New Account',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue[700],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Info Text
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.blue[50],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.info_outline, color: Colors.blue[700]),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            'New workers can register with KYC verification to start earning',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.blue[900],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                    child: Text('Create New Account',
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue[700])),
                   ),
                 ],
               ),

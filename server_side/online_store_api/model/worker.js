@@ -4,8 +4,9 @@ const workerSchema = new mongoose.Schema({
   // Authentication fields
   username: { type: String, trim: true, lowercase: true, index: true, unique: true, sparse: true },
   email: { type: String, trim: true, lowercase: true, index: true, unique: true, sparse: true },
-  phone: { type: String, trim: true, index: true, unique: true, required: true }, // E.164 format
-  passwordHash: { type: String, required: true }, // bcrypt hash
+  phone: { type: String, trim: true, index: true, unique: true, sparse: true }, // optional contact field (no longer used for auth)
+  googleId: { type: String, index: true, unique: true, sparse: true }, // Google "sub" for Sign in with Google
+  passwordHash: { type: String }, // bcrypt hash (optional for passwordless email/Google accounts)
   
   // Basic Information
   name: { type: String, required: true, trim: true },
@@ -160,9 +161,9 @@ const workerSchema = new mongoose.Schema({
 workerSchema.index({ location: '2dsphere' });
 
 // Other indexes for performance
-workerSchema.index({ phone: 1 });
-workerSchema.index({ email: 1 });
-workerSchema.index({ username: 1 });
+// Note: phone/email/username already get unique indexes from their field-level
+// `index: true, unique: true` definitions above. Re-declaring them here caused
+// Mongoose "Duplicate schema index" warnings, so they are intentionally omitted.
 workerSchema.index({ primaryCategory: 1, active: 1 });
 workerSchema.index({ skills: 1 });
 workerSchema.index({ latitude: 1, longitude: 1 });

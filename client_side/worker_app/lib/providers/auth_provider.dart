@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import '../config/app_config.dart';
 import '../services/api_service.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -27,13 +29,21 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // Sign up new worker
+  // Persist worker data from a successful auth response.
+  void _persistWorker(Map<String, dynamic> response) {
+    _workerData = response['data']['worker'];
+    _storage.write('worker_data', _workerData);
+  }
+
+  // Sign up new worker. After signup the backend emails a verification code;
+  // call verifyEmailOtp() with that code to finish and log in.
   Future<bool> signup({
-    required String phone,
+    required String email,
     required String name,
     required String password,
-    String? email,
-    List<String>? serviceType,
+    required String primaryCategory,
+    String? phone,
+    List<String>? skills,
     String? city,
   }) async {
     _isLoading = true;
@@ -42,23 +52,21 @@ class AuthProvider extends ChangeNotifier {
 
     try {
       final response = await _apiService.workerSignup(
-        phone: phone,
+        email: email,
         name: name,
         password: password,
-        email: email,
-        serviceType: serviceType,
+        primaryCategory: primaryCategory,
+        phone: phone,
+        skills: skills,
         city: city,
       );
 
+      _isLoading = false;
       if (response['success'] == true) {
-        _workerData = response['data']['worker'];
-        _storage.write('worker_data', _workerData);
-        _isLoading = false;
         notifyListeners();
-        return true;
+        return true; // code emailed; proceed to OTP screen
       } else {
         _errorMessage = response['message'] ?? 'Signup failed';
-        _isLoading = false;
         notifyListeners();
         return false;
       }
@@ -70,9 +78,9 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // Login worker
+  // Login worker with email/username/phone + password.
   Future<bool> login({
-    required String phone,
+    required String identifier,
     required String password,
   }) async {
     _isLoading = true;
@@ -81,13 +89,12 @@ class AuthProvider extends ChangeNotifier {
 
     try {
       final response = await _apiService.workerLogin(
-        phone: phone,
+        identifier: identifier,
         password: password,
       );
 
       if (response['success'] == true) {
-        _workerData = response['data']['worker'];
-        _storage.write('worker_data', _workerData);
+        _persistWorker(response);
         _isLoading = false;
         notifyListeners();
         return true;
@@ -99,6 +106,101 @@ class AuthProvider extends ChangeNotifier {
       }
     } catch (e) {
       _errorMessage = 'Error during login: $e';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  // Request an email OTP for login.
+  Future<bool> requestEmailOtp(String email) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    try {
+      final response = await _apiService.workerRequestEmailOtp(email: email);
+      _isLoading = false;
+      if (response['success'] == true) {
+        notifyListeners();
+        return true;
+      }
+      _errorMessage = response['message'] ?? 'Failed to send code';
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _errorMessage = 'Error: $e';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  // Verify an email OTP and log in.
+  Future<bool> verifyEmailOtp(
+      {required String email, required String code}) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    try {
+      final response =
+          await _apiService.workerVerifyEmailOtp(email: email, code: code);
+      _isLoading = false;
+      if (response['success'] == true) {
+        _persistWorker(response);
+        notifyListeners();
+        return true;
+      }
+      _errorMessage = response['message'] ?? 'Verification failed';
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _errorMessage = 'Error: $e';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  // Continue with Google.
+  Future<bool> signInWithGoogle() async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    try {
+      final googleSignIn = GoogleSignIn(
+        scopes: const ['email', 'profile'],
+        serverClientId: AppConfig.googleWebClientId.isNotEmpty
+            ? AppConfig.googleWebClientId
+            : null,
+      );
+      await googleSignIn.signOut();
+      final account = await googleSignIn.signIn();
+      if (account == null) {
+        _errorMessage = 'Google sign-in cancelled';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+      final gAuth = await account.authentication;
+      final idToken = gAuth.idToken;
+      if (idToken == null) {
+        _errorMessage = 'Could not obtain Google ID token. Check GOOGLE_WEB_CLIENT_ID.';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+      final response = await _apiService.workerGoogleSignIn(idToken: idToken);
+      _isLoading = false;
+      if (response['success'] == true) {
+        _persistWorker(response);
+        notifyListeners();
+        return true;
+      }
+      _errorMessage = response['message'] ?? 'Google sign-in failed';
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _errorMessage = 'Google sign-in error: $e';
       _isLoading = false;
       notifyListeners();
       return false;

@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter_login/flutter_login.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../models/user.dart';
 import '../../../utility/snack_bar_helper.dart';
@@ -119,50 +120,88 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  Future<String?> requestOtp(String phone) async {
+  // Persist user + tokens from a successful auth response body.
+  Future<void> _persistAuth(dynamic body) async {
+    final user = User.fromJson(body['data']['user'] as Map<String, dynamic>);
+    final accessToken = body['data']['accessToken'] ?? body['data']['token'];
+    final refreshToken = body['data']['refreshToken'];
+    await saveLoginInfo(user);
+    if (accessToken != null) await box.write(AUTH_TOKEN_BOX, accessToken);
+    if (refreshToken != null) await box.write('refresh_token', refreshToken);
+  }
+
+  // Request an email OTP code (used for both signup and login).
+  Future<String?> requestEmailOtp({required String email, String? name}) async {
     try {
-      final norm = phone.replaceAll(RegExp(r"[\s-]"), '');
-      final res = await service
-          .addItem(endpointUrl: 'auth/request-otp', itemData: {'phone': norm});
+      final payload = <String, dynamic>{
+        'email': email.trim().toLowerCase(),
+        if (name != null && name.trim().isNotEmpty) 'name': name.trim(),
+      };
+      final res = await service.addItem(
+          endpointUrl: 'auth/email/request-otp', itemData: payload);
       if (res.isOk && (res.body['success'] == true)) {
-        await box.write(PENDING_OTP_PHONE, norm);
-        SnackBarHelper.showSuccessSnackBar(res.body['message'] ?? 'OTP sent');
+        await box.write(PENDING_OTP_EMAIL, payload['email']);
+        SnackBarHelper.showSuccessSnackBar(
+            res.body['message'] ?? 'Verification code sent to your email');
         return null;
       }
-      return res.body?['message'] ?? 'Failed to request OTP';
+      return res.body?['message'] ?? 'Failed to send verification code';
     } catch (e) {
       return 'Error: $e';
     }
   }
 
-  Future<String?> verifyOtp(
-      {required String phone, required String code}) async {
+  // Verify an email OTP code and log the user in.
+  Future<String?> verifyEmailOtp(
+      {required String email, required String code}) async {
     try {
-      final norm = phone.replaceAll(RegExp(r"[\s-]"), '');
       final res = await service.addItem(
-          endpointUrl: 'auth/verify-otp',
-          itemData: {'phone': norm, 'code': code});
+          endpointUrl: 'auth/email/verify-otp',
+          itemData: {'email': email.trim().toLowerCase(), 'code': code.trim()});
       if (res.isOk && (res.body['success'] == true)) {
-        final user =
-            User.fromJson(res.body['data']['user'] as Map<String, dynamic>);
-        final accessToken =
-            res.body['data']['accessToken'] ?? res.body['data']['token'];
-        final refreshToken = res.body['data']['refreshToken'];
-
-        await saveLoginInfo(user);
-        if (accessToken != null) {
-          await box.write(AUTH_TOKEN_BOX, accessToken);
-        }
-        if (refreshToken != null) {
-          await box.write('refresh_token', refreshToken);
-        }
-        await box.remove(PENDING_OTP_PHONE);
-        SnackBarHelper.showSuccessSnackBar('Welcome back');
+        await _persistAuth(res.body);
+        await box.remove(PENDING_OTP_EMAIL);
+        SnackBarHelper.showSuccessSnackBar('Welcome!');
         return null;
       }
       return res.body?['message'] ?? 'OTP verification failed';
     } catch (e) {
       return 'Error: $e';
+    }
+  }
+
+  // Continue with Google: get an ID token, then exchange it for our tokens.
+  Future<String?> signInWithGoogle() async {
+    try {
+      final googleSignIn = GoogleSignIn(
+        scopes: const ['email', 'profile'],
+        // serverClientId must be the Web client ID so the backend can verify the token.
+        serverClientId:
+            GOOGLE_WEB_CLIENT_ID.isNotEmpty ? GOOGLE_WEB_CLIENT_ID : null,
+      );
+      // Sign out first so the account chooser always shows.
+      await googleSignIn.signOut();
+      final account = await googleSignIn.signIn();
+      if (account == null) {
+        return 'Google sign-in cancelled';
+      }
+      final gAuth = await account.authentication;
+      final idToken = gAuth.idToken;
+      if (idToken == null) {
+        return 'Could not obtain Google ID token. Check your GOOGLE_WEB_CLIENT_ID configuration.';
+      }
+      final res = await service
+          .addItem(endpointUrl: 'auth/google', itemData: {'idToken': idToken});
+      if (res.isOk && (res.body['success'] == true)) {
+        await _persistAuth(res.body);
+        SnackBarHelper.showSuccessSnackBar(
+            res.body['message'] ?? 'Signed in with Google');
+        return null;
+      }
+      return res.body?['message'] ?? 'Google sign-in failed';
+    } catch (e) {
+      log('Google sign-in error: $e');
+      return 'Google sign-in error: $e';
     }
   }
 

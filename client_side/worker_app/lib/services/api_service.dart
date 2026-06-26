@@ -29,11 +29,12 @@ class ApiService {
 
   // Authentication APIs
   Future<Map<String, dynamic>> workerSignup({
-    required String phone,
+    required String email,
     required String name,
     required String password,
-    String? email,
-    List<String>? serviceType,
+    required String primaryCategory,
+    String? phone,
+    List<String>? skills,
     String? city,
   }) async {
     try {
@@ -41,12 +42,13 @@ class ApiService {
         Uri.parse('$baseUrl/worker-auth/register'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'phone': phone,
+          'email': email,
           'name': name,
           'password': password,
-          if (email != null) 'email': email,
-          'serviceType': serviceType ?? [],
-          if (city != null) 'city': city,
+          'primaryCategory': primaryCategory,
+          if (phone != null && phone.isNotEmpty) 'phone': phone,
+          'skills': skills ?? [],
+          if (city != null) 'address': {'city': city},
         }),
       );
 
@@ -57,7 +59,7 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> workerLogin({
-    required String phone,
+    required String identifier,
     required String password,
   }) async {
     try {
@@ -65,11 +67,60 @@ class ApiService {
         Uri.parse('$baseUrl/worker-auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'phone': phone,
+          'identifier': identifier,
           'password': password,
         }),
       );
 
+      return _handleResponse(response);
+    } catch (e) {
+      return {'success': false, 'message': 'Network error: $e'};
+    }
+  }
+
+  // Request an email OTP for worker login.
+  Future<Map<String, dynamic>> workerRequestEmailOtp({
+    required String email,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/worker-auth/email/request-otp'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
+      return _handleResponse(response);
+    } catch (e) {
+      return {'success': false, 'message': 'Network error: $e'};
+    }
+  }
+
+  // Verify an email OTP and log the worker in.
+  Future<Map<String, dynamic>> workerVerifyEmailOtp({
+    required String email,
+    required String code,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/worker-auth/email/verify-otp'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email, 'code': code}),
+      );
+      return _handleResponse(response);
+    } catch (e) {
+      return {'success': false, 'message': 'Network error: $e'};
+    }
+  }
+
+  // Exchange a Google ID token for our worker tokens.
+  Future<Map<String, dynamic>> workerGoogleSignIn({
+    required String idToken,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/worker-auth/google'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'idToken': idToken}),
+      );
       return _handleResponse(response);
     } catch (e) {
       return {'success': false, 'message': 'Network error: $e'};
@@ -354,9 +405,13 @@ class ApiService {
     final data = jsonDecode(response.body);
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      // Save token if present
-      if (data['data'] != null && data['data']['token'] != null) {
-        _storage.write('auth_token', data['data']['token']);
+      // Save tokens if present (backend returns accessToken/refreshToken).
+      if (data['data'] != null) {
+        final accessToken = data['data']['accessToken'] ?? data['data']['token'];
+        if (accessToken != null) _storage.write('auth_token', accessToken);
+        if (data['data']['refreshToken'] != null) {
+          _storage.write('refresh_token', data['data']['refreshToken']);
+        }
       }
       return data;
     } else {

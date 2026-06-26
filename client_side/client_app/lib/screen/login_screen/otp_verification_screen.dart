@@ -4,9 +4,10 @@ import '../home_screen.dart';
 import '../../utility/constants.dart';
 import '../../utility/extensions.dart';
 
+/// Standalone email OTP verification screen.
 class OtpVerificationScreen extends StatefulWidget {
-  final String? phone;
-  const OtpVerificationScreen({super.key, this.phone});
+  final String? email;
+  const OtpVerificationScreen({super.key, this.email});
 
   @override
   State<OtpVerificationScreen> createState() => _OtpVerificationScreenState();
@@ -17,8 +18,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   final _box = GetStorage();
   bool _busy = false;
 
-  String get _phone =>
-      widget.phone ?? (_box.read(PENDING_OTP_PHONE) as String? ?? '');
+  String get _email =>
+      widget.email ?? (_box.read(PENDING_OTP_EMAIL) as String? ?? '');
 
   @override
   void dispose() {
@@ -27,11 +28,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   }
 
   Future<void> _verify() async {
-    if (_phone.isEmpty) return;
+    if (_email.isEmpty) return;
     if (_codeCtrl.text.trim().length < 4) return; // basic check
     setState(() => _busy = true);
     final err = await context.userProvider
-        .verifyOtp(phone: _phone, code: _codeCtrl.text.trim());
+        .verifyEmailOtp(email: _email, code: _codeCtrl.text.trim());
     setState(() => _busy = false);
     if (err == null) {
       if (!mounted) return;
@@ -43,9 +44,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   }
 
   Future<void> _resend() async {
-    if (_phone.isEmpty) return;
+    if (_email.isEmpty) return;
     setState(() => _busy = true);
-    await context.userProvider.requestOtp(_phone);
+    await context.userProvider.requestEmailOtp(email: _email);
     setState(() => _busy = false);
   }
 
@@ -53,19 +54,19 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('Verify OTP')),
+      appBar: AppBar(title: const Text('Verify Email')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Code sent to $_phone',
+            Text('Code sent to $_email',
                 style: TextStyle(color: Theme.of(context).hintColor)),
             const SizedBox(height: 12),
             TextField(
               controller: _codeCtrl,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Enter 6-digit OTP'),
+              decoration: const InputDecoration(labelText: 'Enter 6-digit code'),
               maxLength: 6,
             ),
             const SizedBox(height: 8),
@@ -79,7 +80,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 const SizedBox(width: 12),
                 TextButton(
                     onPressed: _busy ? null : _resend,
-                    child: const Text('Resend OTP')),
+                    child: const Text('Resend code')),
               ],
             ),
             if (_busy) ...[

@@ -34,6 +34,7 @@ dependencies:
   visibility_detector: ^0.4.0+2 # Detect widget visibility for lazy loading
   image_picker: ^1.2.0 # For picking images from gallery/camera
   http: ^1.5.0 # HTTP client for API requests
+  google_sign_in: ^6.2.1 # "Continue with Google" sign-in
   flutter_staggered_animations: ^1.1.1
   hive: ^2.2.3
   hive_flutter: ^1.1.0

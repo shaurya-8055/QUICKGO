@@ -9,3 +9,8 @@ const defaultPadding = 16.0;
 const String _DEFAULT_URL = 'http://localhost:3000';
 const String MAIN_URL =
     String.fromEnvironment('API_BASE_URL', defaultValue: _DEFAULT_URL);
+
+// Google OAuth Web client ID (serverClientId/clientId for Sign in with Google).
+// Pass at build: --dart-define=GOOGLE_WEB_CLIENT_ID=xxx.apps.googleusercontent.com
+const String GOOGLE_WEB_CLIENT_ID =
+    String.fromEnvironment('GOOGLE_WEB_CLIENT_ID', defaultValue: '');
