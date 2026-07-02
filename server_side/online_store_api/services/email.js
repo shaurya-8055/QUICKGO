@@ -1,14 +1,55 @@
 // services/email.js
-// Email delivery via SMTP (Gmail by default) using nodemailer.
+// Email delivery. Prefers Brevo's transactional HTTP API (reliable on hosts
+// like Render where outbound SMTP is often throttled/blocked); falls back to
+// SMTP via nodemailer if Brevo isn't configured or a send fails.
+const axios = require('axios');
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
-// Check if email environment variables are configured
+const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
+
+function hasBrevo() {
+  return !!process.env.BREVO_API_KEY;
+}
+
+// Check if SMTP environment variables are configured
 function hasEmailEnv() {
   return !!(process.env.EMAIL_HOST &&
             process.env.EMAIL_PORT &&
             process.env.EMAIL_USER &&
             process.env.EMAIL_PASS);
+}
+
+// Build Brevo's sender object from EMAIL_FROM. Accepts "Name <email>" or a
+// plain address. NOTE: this address/domain must be a verified sender in Brevo,
+// otherwise the API rejects the send.
+function parseSender() {
+  const from = process.env.EMAIL_FROM || process.env.EMAIL_USER || '';
+  const match = from.match(/^\s*(.*?)\s*<\s*([^>]+)\s*>\s*$/);
+  if (match) return { name: match[1] || 'QuickGo', email: match[2] };
+  return { name: process.env.EMAIL_FROM_NAME || 'QuickGo', email: from };
+}
+
+async function sendViaBrevo({ to, subject, text, html }) {
+  const res = await axios.post(
+    BREVO_API_URL,
+    {
+      sender: parseSender(),
+      to: [{ email: to }],
+      subject,
+      htmlContent: html || undefined,
+      textContent: text || undefined,
+    },
+    {
+      headers: {
+        'api-key': process.env.BREVO_API_KEY,
+        'content-type': 'application/json',
+        accept: 'application/json',
+      },
+      timeout: 15000,
+    }
+  );
+  return res.data; // { messageId }
 }
 
 let transporter = null;
@@ -29,11 +70,28 @@ function getTransporter() {
 }
 
 // Send a generic email. Returns { ok, fallback?, message? }.
+// Tries Brevo first, then SMTP, then logs (so dev flows don't break).
 async function sendEmail({ to, subject, text, html }) {
+  // 1) Brevo transactional API (preferred)
+  if (hasBrevo()) {
+    try {
+      const data = await sendViaBrevo({ to, subject, text, html });
+      console.log(`[EMAIL] Sent via Brevo to ${to} messageId=${data && data.messageId}`);
+      return { ok: true };
+    } catch (err) {
+      const detail = err.response && err.response.data
+        ? JSON.stringify(err.response.data)
+        : err.message;
+      console.error(`[EMAIL][BREVO][ERROR] to ${to}: ${detail}`);
+      // fall through to SMTP if it's configured
+    }
+  }
+
+  // 2) SMTP fallback via nodemailer
   const tx = getTransporter();
   if (!tx) {
-    // No email configured: log instead of failing so OTP flows still work in dev.
-    console.warn('[EMAIL] Not configured (EMAIL_* missing). Would have sent:', { to, subject, text });
+    // Nothing configured: log instead of failing so OTP flows still work in dev.
+    console.warn('[EMAIL] Not configured (BREVO_API_KEY / EMAIL_* missing). Would have sent:', { to, subject, text });
     return { ok: true, fallback: true };
   }
   try {
@@ -44,7 +102,7 @@ async function sendEmail({ to, subject, text, html }) {
       text,
       html,
     });
-    console.log(`[EMAIL] Sent to ${to} messageId=${info.messageId}`);
+    console.log(`[EMAIL] Sent via SMTP to ${to} messageId=${info.messageId}`);
     return { ok: true };
   } catch (err) {
     console.error(`[EMAIL][ERROR] to ${to}:`, err.message);
@@ -66,4 +124,4 @@ async function sendOtpEmail(to, code, purpose = 'verification') {
   return sendEmail({ to, subject, text, html });
 }
 
-module.exports = { hasEmailEnv, sendEmail, sendOtpEmail };
+module.exports = { hasEmailEnv, hasBrevo, sendEmail, sendOtpEmail };
