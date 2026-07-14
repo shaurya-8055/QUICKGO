@@ -6,7 +6,7 @@ const rateLimit = require('express-rate-limit');
 const User = require('../model/user');
 const { generateOtp, hashOtp, verifyOtp } = require('../util/otp');
 const { sendOtpEmail, sendEmail } = require('../services/email');
-const { verifyGoogleIdToken } = require('../services/googleAuth');
+const { verifyGoogleIdToken, verifyGoogleAccessToken } = require('../services/googleAuth');
 const { auth } = require('../middleware/auth');
 const crypto = require('crypto');
 
@@ -227,12 +227,17 @@ router.post('/email/verify-otp', otpLimiter, asyncHandler(async (req, res) => {
 
 // Sign in with Google: verify the ID token from the client and issue our tokens.
 router.post('/google', loginLimiter, asyncHandler(async (req, res) => {
-  const { idToken } = req.body || {};
-  if (!idToken) return res.status(400).json({ success: false, message: 'idToken is required' });
+  const { idToken, accessToken } = req.body || {};
+  if (!idToken && !accessToken) {
+    return res.status(400).json({ success: false, message: 'idToken or accessToken is required' });
+  }
 
   let profile;
   try {
-    profile = await verifyGoogleIdToken(idToken);
+    // Flutter web (Google Identity Services) only provides an access token.
+    profile = idToken
+      ? await verifyGoogleIdToken(idToken)
+      : await verifyGoogleAccessToken(accessToken);
   } catch (e) {
     console.error('[GoogleAuth] verify failed:', e.message);
     return res.status(401).json({ success: false, message: 'Invalid Google token' });
@@ -263,6 +268,29 @@ router.post('/google', loginLimiter, asyncHandler(async (req, res) => {
   return res.json({
     success: true,
     message: 'Google sign-in successful',
+    data: { user, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken },
+  });
+}));
+
+// Demo login: instantly sign in with a shared demo account, no credentials.
+router.post('/demo-login', loginLimiter, asyncHandler(async (req, res) => {
+  const email = 'demo@quickgo.com';
+  let user = await User.findOne({ email });
+  if (!user) {
+    user = await User.create({
+      email,
+      name: 'Demo User',
+      isEmailVerified: true,
+      tokenVersion: 0,
+    });
+  }
+  user.lastLoginAt = new Date();
+  await user.save();
+
+  const tokens = signTokens(user);
+  return res.json({
+    success: true,
+    message: 'Signed in as demo user',
     data: { user, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken },
   });
 }));
