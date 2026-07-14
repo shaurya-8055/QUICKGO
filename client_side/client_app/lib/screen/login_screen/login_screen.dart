@@ -44,13 +44,20 @@ class LoginScreen extends StatelessWidget {
           icon: const Icon(Icons.person),
         ),
       ],
-      // "Continue with Google" button.
+      // "Continue with Google" and instant demo login buttons.
       loginProviders: [
         LoginProvider(
           icon: FontAwesomeIcons.google,
           label: 'Continue with Google',
           callback: () async {
             return await context.userProvider.signInWithGoogle();
+          },
+        ),
+        LoginProvider(
+          icon: FontAwesomeIcons.userSecret,
+          label: 'Demo Login',
+          callback: () async {
+            return await context.userProvider.demoLogin();
           },
         ),
       ],

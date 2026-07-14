@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_login/flutter_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -175,9 +176,15 @@ class UserProvider extends ChangeNotifier {
     try {
       final googleSignIn = GoogleSignIn(
         scopes: const ['email', 'profile'],
-        // serverClientId must be the Web client ID so the backend can verify the token.
-        serverClientId:
-            GOOGLE_WEB_CLIENT_ID.isNotEmpty ? GOOGLE_WEB_CLIENT_ID : null,
+        // On web the plugin needs clientId (serverClientId is not supported
+        // there); on mobile serverClientId must be the Web client ID so the
+        // backend can verify the token.
+        clientId: kIsWeb && GOOGLE_WEB_CLIENT_ID.isNotEmpty
+            ? GOOGLE_WEB_CLIENT_ID
+            : null,
+        serverClientId: !kIsWeb && GOOGLE_WEB_CLIENT_ID.isNotEmpty
+            ? GOOGLE_WEB_CLIENT_ID
+            : null,
       );
       // Sign out first so the account chooser always shows.
       await googleSignIn.signOut();
@@ -186,12 +193,17 @@ class UserProvider extends ChangeNotifier {
         return 'Google sign-in cancelled';
       }
       final gAuth = await account.authentication;
+      // On web (Google Identity Services) signIn() yields no ID token, only an
+      // access token — the backend accepts either.
       final idToken = gAuth.idToken;
-      if (idToken == null) {
-        return 'Could not obtain Google ID token. Check your GOOGLE_WEB_CLIENT_ID configuration.';
+      final accessToken = gAuth.accessToken;
+      if (idToken == null && accessToken == null) {
+        return 'Could not obtain Google credentials. Check your GOOGLE_WEB_CLIENT_ID configuration.';
       }
-      final res = await service
-          .addItem(endpointUrl: 'auth/google', itemData: {'idToken': idToken});
+      final res = await service.addItem(endpointUrl: 'auth/google', itemData: {
+        if (idToken != null) 'idToken': idToken,
+        if (idToken == null) 'accessToken': accessToken,
+      });
       if (res.isOk && (res.body['success'] == true)) {
         await _persistAuth(res.body);
         SnackBarHelper.showSuccessSnackBar(
@@ -202,6 +214,23 @@ class UserProvider extends ChangeNotifier {
     } catch (e) {
       log('Google sign-in error: $e');
       return 'Google sign-in error: $e';
+    }
+  }
+
+  // Demo login: sign in instantly with the shared demo account.
+  Future<String?> demoLogin() async {
+    try {
+      final res =
+          await service.addItem(endpointUrl: 'auth/demo-login', itemData: {});
+      if (res.isOk && (res.body['success'] == true)) {
+        await _persistAuth(res.body);
+        SnackBarHelper.showSuccessSnackBar(
+            res.body['message'] ?? 'Signed in as demo user');
+        return null;
+      }
+      return res.body?['message'] ?? 'Demo login failed';
+    } catch (e) {
+      return 'Error: $e';
     }
   }
 
