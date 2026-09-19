@@ -90,8 +90,12 @@ async function sendEmail({ to, subject, text, html }) {
   // 2) SMTP fallback via nodemailer
   const tx = getTransporter();
   if (!tx) {
-    // Nothing configured: log instead of failing so OTP flows still work in dev.
+    // Nothing configured. In dev, log the mail so OTP flows still work locally;
+    // in production report the failure instead of pretending the mail was sent.
     console.warn('[EMAIL] Not configured (BREVO_API_KEY / EMAIL_* missing). Would have sent:', { to, subject, text });
+    if (process.env.NODE_ENV === 'production') {
+      return { ok: false, message: 'Email delivery is not configured on the server' };
+    }
     return { ok: true, fallback: true };
   }
   try {
