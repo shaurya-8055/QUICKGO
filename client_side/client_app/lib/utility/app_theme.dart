@@ -210,7 +210,7 @@ class AppTheme {
 
         // Color Scheme with high contrast
         colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF8B5CF6),
+          primary: Color(0xFF13867C),
           primaryContainer: Color(0xFF6D28D9),
           onPrimary: Colors.white,
           secondary: Color(0xFFFF6B35),
@@ -254,10 +254,10 @@ class AppTheme {
         // Elevated Button Theme
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF8B5CF6),
+            backgroundColor: const Color(0xFF13867C),
             foregroundColor: Colors.white,
             elevation: 4,
-            shadowColor: const Color(0xFF8B5CF6).withOpacity(0.3),
+            shadowColor: const Color(0xFF13867C).withOpacity(0.3),
             shape: RoundedRectangleBorder(
               borderRadius: AppRadius.lgRadius,
             ),
@@ -273,7 +273,7 @@ class AppTheme {
         // Text Button Theme
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
-            foregroundColor: const Color(0xFF8B5CF6),
+            foregroundColor: const Color(0xFF13867C),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             textStyle: const TextStyle(
               fontSize: 14,
@@ -381,7 +381,7 @@ class AppTheme {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: AppRadius.mdRadius,
-            borderSide: const BorderSide(color: Color(0xFF8B5CF6), width: 2),
+            borderSide: const BorderSide(color: Color(0xFF13867C), width: 2),
           ),
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 16, vertical: 16),

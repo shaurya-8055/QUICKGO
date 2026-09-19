@@ -8,10 +8,10 @@ class AppColors {
   static const Color primaryLight = Color(0xFF252A3A);
   static const Color primaryDark = Color(0xFF0F1419);
 
-  // Secondary Colors - Elegant Purple/Blue Gradient
-  static const Color secondary = Color(0xFF6366F1);
-  static const Color secondaryLight = Color(0xFF8B5CF6);
-  static const Color secondaryDark = Color(0xFF4F46E5);
+  // Secondary Colors - single premium teal (no gradient)
+  static const Color secondary = Color(0xFF0F766E);
+  static const Color secondaryLight = Color(0xFF13867C);
+  static const Color secondaryDark = Color(0xFF0B5D57);
 
   // Accent Colors - Premium Gold/Orange
   static const Color accent = Color(0xFFFF6B35);
@@ -64,7 +64,7 @@ class AppColors {
 
   // Gradient Collections
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+    colors: [Color(0xFF0F766E), Color(0xFF0F766E)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -95,13 +95,13 @@ class AppColors {
 
   // Premium Glassmorphism Colors
   static Color glassPrimary = const Color(0xFFFFFFFF).withOpacity(0.1);
-  static Color glassSecondary = const Color(0xFF6366F1).withOpacity(0.1);
+  static Color glassSecondary = const Color(0xFF0F766E).withOpacity(0.1);
   static Color glassAccent = const Color(0xFFFF6B35).withOpacity(0.1);
 
   // Status Colors with Transparency
   static Color inStock = const Color(0xFF10B981).withOpacity(0.1);
   static Color outOfStock = const Color(0xFFEF4444).withOpacity(0.1);
-  static Color newProduct = const Color(0xFF6366F1).withOpacity(0.1);
+  static Color newProduct = const Color(0xFF0F766E).withOpacity(0.1);
   static Color sale = const Color(0xFFFF6B35).withOpacity(0.1);
 
   // Social Media Inspired Colors
@@ -143,7 +143,7 @@ class AppColors {
       const Color(0xFF4ECDC4), // Teal
       const Color(0xFFFF6B6B), // Coral
       const Color(0xFF45B7D1), // Blue
-      const Color(0xFF8B5CF6), // Purple
+      const Color(0xFF13867C), // Purple
       const Color(0xFFFF8A65), // Orange
       const Color(0xFF10B981), // Green
     ];
