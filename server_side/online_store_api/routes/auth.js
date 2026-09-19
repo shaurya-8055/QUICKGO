@@ -5,7 +5,7 @@ const asyncHandler = require('express-async-handler');
 const rateLimit = require('express-rate-limit');
 const User = require('../model/user');
 const { generateOtp, hashOtp, verifyOtp } = require('../util/otp');
-const { sendOtpEmail, sendEmail } = require('../services/email');
+const { sendOtpEmail, sendEmail, hasBrevo, hasEmailEnv } = require('../services/email');
 const { verifyGoogleIdToken, verifyGoogleAccessToken } = require('../services/googleAuth');
 const { auth } = require('../middleware/auth');
 const crypto = require('crypto');
@@ -186,7 +186,12 @@ router.post('/email/request-otp', otpLimiter, asyncHandler(async (req, res) => {
   await user.save();
 
   const result = await sendOtpEmail(email, otp, isNew ? 'signup' : 'login');
-  if (!result.ok) return res.status(502).json({ success: false, message: 'Failed to send verification email' });
+  if (!result.ok) {
+    return res.status(502).json({
+      success: false,
+      message: result.message || 'Failed to send verification email',
+    });
+  }
 
   return res.json({
     success: true,
@@ -194,6 +199,12 @@ router.post('/email/request-otp', otpLimiter, asyncHandler(async (req, res) => {
     data: { isNewUser: isNew },
   });
 }));
+
+// Which mail transport is live. No secrets, just booleans, so a failing OTP
+// can be diagnosed without shell access to the host.
+router.get('/email/status', (req, res) => {
+  res.json({ success: true, data: { brevo: hasBrevo(), smtp: hasEmailEnv() } });
+});
 
 // Verify an email OTP and return auth tokens.
 router.post('/email/verify-otp', otpLimiter, asyncHandler(async (req, res) => {

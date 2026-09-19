@@ -21,6 +21,25 @@ class LoginScreen extends StatelessWidget {
         confirmSignupSuccess: 'Email verified!',
       ),
       loginAfterSignUp: false, // we verify the email OTP before logging in
+      // Mirror the server's rules (routes/auth.js validatePassword) so the
+      // user sees what is wrong before the round trip.
+      userValidator: (value) {
+        final email = (value ?? '').trim();
+        if (email.isEmpty) return 'Email is required';
+        final ok = RegExp(r'^[\w.+-]+@[\w-]+\.[\w.-]+$').hasMatch(email);
+        return ok ? null : 'Enter a valid email address';
+      },
+      passwordValidator: (value) {
+        final p = value ?? '';
+        if (p.length < 8) return 'At least 8 characters';
+        if (!RegExp(r'[A-Z]').hasMatch(p)) return 'Add an uppercase letter (A-Z)';
+        if (!RegExp(r'[a-z]').hasMatch(p)) return 'Add a lowercase letter (a-z)';
+        if (!RegExp(r'\d').hasMatch(p)) return 'Add a number (0-9)';
+        if (!RegExp(r'[!@#\$%^&*(),.?":{}|<>]').hasMatch(p)) {
+          return r'Add a special character (!@#$%^&*)';
+        }
+        return null;
+      },
       logo: const AssetImage('assets/images/logo.png'),
       onLogin: (LoginData loginData) => context.userProvider.login(loginData),
       // Signup sends an email OTP; the confirm step verifies it and logs in.
