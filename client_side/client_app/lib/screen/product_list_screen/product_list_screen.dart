@@ -139,7 +139,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
                           height: 18,
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
-                              colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                              colors: [Color(0xFF667eea),
+Color(0xFF667eea)],
                             ),
                             borderRadius: BorderRadius.circular(2),
                           ),
@@ -194,7 +195,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
                                 horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
-                                colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                                colors: [Color(0xFF667eea),
+Color(0xFF667eea)],
                               ),
                               borderRadius: BorderRadius.circular(20),
                               boxShadow: [
@@ -251,7 +253,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
                           height: 18,
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
-                              colors: [Color(0xFF11998e), Color(0xFF38ef7d)],
+                              colors: [Color(0xFF11998e),
+Color(0xFF11998e)],
                             ),
                             borderRadius: BorderRadius.circular(2),
                           ),
@@ -274,7 +277,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
                               horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
-                              colors: [Color(0xFF11998e), Color(0xFF38ef7d)],
+                              colors: [Color(0xFF11998e),
+Color(0xFF11998e)],
                             ),
                             borderRadius: BorderRadius.circular(20),
                           ),

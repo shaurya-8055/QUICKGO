@@ -120,7 +120,8 @@ class ProfileScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: LinearGradient(
-                            colors: [cs.primary, cs.primary.withOpacity(0.6)]),
+                            colors: [cs.primary,
+cs.primary]),
                       ),
                       child: const CircleAvatar(
                         radius: 36,

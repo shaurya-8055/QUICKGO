@@ -359,10 +359,8 @@ class _EnhancedProductCardState extends State<EnhancedProductCard>
                       ? LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [
-                            AppColors.surface,
-                            AppColors.surfaceElevated,
-                          ],
+                          colors: [AppColors.surface,
+AppColors.surface],
                         )
                       : AppColors.cardGradient,
                   boxShadow: isHovered ? AppShadows.premium : AppShadows.medium,
@@ -395,10 +393,8 @@ class _EnhancedProductCardState extends State<EnhancedProductCard>
                                   gradient: LinearGradient(
                                     begin: Alignment.topCenter,
                                     end: Alignment.bottomCenter,
-                                    colors: [
-                                      AppColors.surfaceContainer,
-                                      AppColors.surface,
-                                    ],
+                                    colors: [AppColors.surfaceContainer,
+AppColors.surfaceContainer],
                                   ),
                                   borderRadius: BorderRadius.only(
                                     topLeft: Radius.circular(24),
@@ -427,11 +423,10 @@ class _EnhancedProductCardState extends State<EnhancedProductCard>
                                                   return Container(
                                                     decoration: BoxDecoration(
                                                       gradient: LinearGradient(
-                                                        colors: [
-                                                          AppColors
+                                                        colors: [AppColors
                                                               .surfaceContainer,
-                                                          AppColors.surface,
-                                                        ],
+AppColors
+                                                              .surfaceContainer],
                                                       ),
                                                     ),
                                                     child: Icon(
@@ -447,11 +442,10 @@ class _EnhancedProductCardState extends State<EnhancedProductCard>
                                             : Container(
                                                 decoration: BoxDecoration(
                                                   gradient: LinearGradient(
-                                                    colors: [
-                                                      AppColors
+                                                    colors: [AppColors
                                                           .surfaceContainer,
-                                                      AppColors.surface,
-                                                    ],
+AppColors
+                                                          .surfaceContainer],
                                                   ),
                                                 ),
                                                 child: Icon(

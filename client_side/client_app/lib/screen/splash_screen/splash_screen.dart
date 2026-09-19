@@ -60,11 +60,9 @@ class _SplashScreenState extends State<SplashScreen> {
                 gradient: const LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFF00F5FF),
-                    Color(0xFF0080FF),
-                    Color(0xFF0040FF),
-                  ],
+                  colors: [Color(0xFF00F5FF),
+Color(0xFF00F5FF),
+Color(0xFF00F5FF)],
                 ),
                 boxShadow: [
                   BoxShadow(
@@ -84,11 +82,9 @@ class _SplashScreenState extends State<SplashScreen> {
             ShaderMask(
               shaderCallback: (Rect bounds) {
                 return const LinearGradient(
-                  colors: [
-                    Color(0xFF00F5FF),
-                    Color(0xFF0080FF),
-                    Color(0xFFFFFFFF),
-                  ],
+                  colors: [Color(0xFF00F5FF),
+Color(0xFF00F5FF),
+Color(0xFF00F5FF)],
                   stops: [0.0, 0.5, 1.0],
                 ).createShader(bounds);
               },

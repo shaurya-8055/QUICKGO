@@ -105,7 +105,8 @@ class _ModernFilterBottomSheetState extends State<ModernFilterBottomSheet>
             height: 5,
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                colors: [Color(0xFF667eea),
+Color(0xFF667eea)],
               ),
               borderRadius: BorderRadius.circular(3),
               boxShadow: [
@@ -126,10 +127,8 @@ class _ModernFilterBottomSheetState extends State<ModernFilterBottomSheet>
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  const Color(0xFF667eea).withOpacity(0.1),
-                  const Color(0xFF764ba2).withOpacity(0.05),
-                ],
+                colors: [const Color(0xFF667eea).withOpacity(0.1),
+const Color(0xFF667eea).withOpacity(0.1)],
               ),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
@@ -143,7 +142,8 @@ class _ModernFilterBottomSheetState extends State<ModernFilterBottomSheet>
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                      colors: [Color(0xFF667eea),
+Color(0xFF667eea)],
                     ),
                     borderRadius: BorderRadius.circular(15),
                     boxShadow: [
@@ -264,7 +264,8 @@ class _ModernFilterBottomSheetState extends State<ModernFilterBottomSheet>
               controller: _tabController,
               indicator: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                  colors: [Color(0xFF667eea),
+Color(0xFF667eea)],
                 ),
                 borderRadius: BorderRadius.circular(15),
                 boxShadow: [
@@ -369,7 +370,8 @@ class _ModernFilterBottomSheetState extends State<ModernFilterBottomSheet>
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                      colors: [Color(0xFF667eea),
+Color(0xFF667eea)],
                     ),
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
@@ -423,7 +425,8 @@ class _ModernFilterBottomSheetState extends State<ModernFilterBottomSheet>
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                colors: [Color(0xFF667eea),
+Color(0xFF667eea)],
               ),
               borderRadius: BorderRadius.circular(15),
             ),
@@ -451,10 +454,8 @@ class _ModernFilterBottomSheetState extends State<ModernFilterBottomSheet>
               gradient: const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFFF8F9FA),
-                  Color(0xFFE3F2FD),
-                ],
+                colors: [Color(0xFFF8F9FA),
+Color(0xFFF8F9FA)],
               ),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
@@ -480,7 +481,8 @@ class _ModernFilterBottomSheetState extends State<ModernFilterBottomSheet>
                           horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                          colors: [Color(0xFF667eea),
+Color(0xFF667eea)],
                         ),
                         borderRadius: BorderRadius.circular(25),
                         boxShadow: [
@@ -521,7 +523,8 @@ class _ModernFilterBottomSheetState extends State<ModernFilterBottomSheet>
                           horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                          colors: [Color(0xFF667eea),
+Color(0xFF667eea)],
                         ),
                         borderRadius: BorderRadius.circular(25),
                         boxShadow: [
@@ -607,7 +610,8 @@ class _ModernFilterBottomSheetState extends State<ModernFilterBottomSheet>
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                colors: [Color(0xFF667eea),
+Color(0xFF667eea)],
               ),
               borderRadius: BorderRadius.circular(15),
             ),
@@ -670,7 +674,8 @@ class _ModernFilterBottomSheetState extends State<ModernFilterBottomSheet>
             decoration: BoxDecoration(
               gradient: isSelected
                   ? const LinearGradient(
-                      colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                      colors: [Color(0xFF667eea),
+Color(0xFF667eea)],
                     )
                   : const LinearGradient(
                       colors: [Color(0xFFF8F9FA), Color(0xFFF8F9FA)],
@@ -738,7 +743,8 @@ class _ModernFilterBottomSheetState extends State<ModernFilterBottomSheet>
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                    colors: [Color(0xFF667eea),
+Color(0xFF667eea)],
                   ),
                   borderRadius: BorderRadius.circular(15),
                 ),
@@ -785,10 +791,8 @@ class _ModernFilterBottomSheetState extends State<ModernFilterBottomSheet>
                         decoration: BoxDecoration(
                           gradient: isSelected
                               ? const LinearGradient(
-                                  colors: [
-                                    Color(0xFF667eea),
-                                    Color(0xFF764ba2)
-                                  ],
+                                  colors: [Color(0xFF667eea),
+Color(0xFF667eea)],
                                 )
                               : const LinearGradient(
                                   colors: [
@@ -878,7 +882,8 @@ class _ModernFilterBottomSheetState extends State<ModernFilterBottomSheet>
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                    colors: [Color(0xFF667eea),
+Color(0xFF667eea)],
                   ),
                   borderRadius: BorderRadius.circular(15),
                 ),
@@ -925,10 +930,8 @@ class _ModernFilterBottomSheetState extends State<ModernFilterBottomSheet>
                         decoration: BoxDecoration(
                           gradient: isSelected
                               ? const LinearGradient(
-                                  colors: [
-                                    Color(0xFF667eea),
-                                    Color(0xFF764ba2)
-                                  ],
+                                  colors: [Color(0xFF667eea),
+Color(0xFF667eea)],
                                 )
                               : const LinearGradient(
                                   colors: [

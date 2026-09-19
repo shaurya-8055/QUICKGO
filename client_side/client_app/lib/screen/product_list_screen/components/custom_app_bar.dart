@@ -53,7 +53,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                       width: 32,
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                          colors: [Color(0xFF667eea),
+Color(0xFF667eea)],
                         ),
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -356,7 +357,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                       padding: EdgeInsets.all(isSmall ? 2 : 3),
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [Color(0xFFFF5722), Color(0xFFE64A19)],
+                          colors: [Color(0xFFFF5722),
+Color(0xFFFF5722)],
                         ),
                         shape: BoxShape.circle,
                       ),
