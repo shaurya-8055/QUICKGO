@@ -1,0 +1,11 @@
+# Normalise line endings so a Windows copy/paste does not rewrite every file
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.jks binary
+*.keystore binary
+*.ttf binary
+*.otf binary
