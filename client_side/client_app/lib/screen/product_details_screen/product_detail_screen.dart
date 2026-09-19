@@ -330,10 +330,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                           gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                            colors: [
-                              AppColors.surfaceContainer,
-                              AppColors.surfaceElevated,
-                            ],
+                            colors: [AppColors.surfaceContainer,
+AppColors.surfaceContainer],
                           ),
                         ),
                         child: images.isNotEmpty
@@ -541,10 +539,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                               height: 3,
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
-                                  colors: [
-                                    colorScheme.primary.withOpacity(0.8),
-                                    colorScheme.primary.withOpacity(0.3),
-                                  ],
+                                  colors: [colorScheme.primary.withOpacity(0.8),
+colorScheme.primary.withOpacity(0.8)],
                                 ),
                                 borderRadius: BorderRadius.circular(2),
                               ),

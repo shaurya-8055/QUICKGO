@@ -443,7 +443,8 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen>
                   ),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                      colors: [Color(0xFF667eea),
+Color(0xFF667eea)],
                     ),
                     borderRadius: BorderRadius.circular(20),
                   ),

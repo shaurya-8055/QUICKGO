@@ -247,14 +247,14 @@ class _PremiumCategoryCardState extends State<PremiumCategoryCard>
   // Premium gradient colors for each category
   List<Color> _getCategoryGradient(int index) {
     final gradients = [
-      [const Color(0xFF667eea), const Color(0xFF764ba2)], // Purple-Blue
-      [const Color(0xFFf093fb), const Color(0xFFf5576c)], // Pink-Red
-      [const Color(0xFF4facfe), const Color(0xFF00f2fe)], // Blue-Cyan
-      [const Color(0xFF43e97b), const Color(0xFF38f9d7)], // Green-Teal
-      [const Color(0xFFfa709a), const Color(0xFFfee140)], // Pink-Yellow
-      [const Color(0xFFa8edea), const Color(0xFFfed6e3)], // Mint-Pink
-      [const Color(0xFFffecd2), const Color(0xFFfcb69f)], // Peach-Orange
-      [const Color(0xFFd299c2), const Color(0xFFfef9d7)], // Purple-Cream
+      [const Color(0xFF0F766E), const Color(0xFF0F766E)],
+      [const Color(0xFF115E59), const Color(0xFF115E59)],
+      [const Color(0xFF13867C), const Color(0xFF13867C)],
+      [const Color(0xFF0B5D57), const Color(0xFF0B5D57)],
+      [const Color(0xFF14746B), const Color(0xFF14746B)],
+      [const Color(0xFF0E6B63), const Color(0xFF0E6B63)],
+      [const Color(0xFF127D74), const Color(0xFF127D74)],
+      [const Color(0xFF0D6A62), const Color(0xFF0D6A62)],
     ];
     return gradients[index % gradients.length];
   }

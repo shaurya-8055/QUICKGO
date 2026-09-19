@@ -1,6 +1,5 @@
 import 'package:client_app/utility/extensions.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../../utility/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
 import '../home_screen.dart';
@@ -44,15 +43,8 @@ class LoginScreen extends StatelessWidget {
           icon: const Icon(Icons.person),
         ),
       ],
-      // "Continue with Google" and instant demo login buttons.
+      // Instant demo login button.
       loginProviders: [
-        LoginProvider(
-          icon: FontAwesomeIcons.google,
-          label: 'Continue with Google',
-          callback: () async {
-            return await context.userProvider.signInWithGoogle();
-          },
-        ),
         LoginProvider(
           icon: FontAwesomeIcons.userSecret,
           label: 'Demo Login',
@@ -81,10 +73,10 @@ class LoginScreen extends StatelessWidget {
       },
       hideForgotPasswordButton: false,
       theme: LoginTheme(
-          primaryColor: AppColor.darkGrey,
-          accentColor: AppColor.darkOrange,
+          primaryColor: const Color(0xFF0B5D57),
+          accentColor: Colors.white,
           buttonTheme: const LoginButtonTheme(
-            backgroundColor: AppColor.darkOrange,
+            backgroundColor: Color(0xFF0F766E),
           ),
           cardTheme: const CardTheme(
               color: Colors.white, surfaceTintColor: Colors.white),

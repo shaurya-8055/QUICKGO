@@ -162,28 +162,22 @@ class _PremiumProductCardState extends State<PremiumProductCard>
         ? LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppColors.backgroundLight,
-              AppColors.backgroundElevated,
-            ],
+            colors: [AppColors.backgroundLight,
+AppColors.backgroundLight],
           )
         : AppColors.cardGradient;
     final LinearGradient cardGradHovered = isDark
         ? LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppColors.backgroundLight.withOpacity(0.95),
-              AppColors.backgroundElevated.withOpacity(0.85),
-            ],
+            colors: [AppColors.backgroundLight.withOpacity(0.95),
+AppColors.backgroundLight.withOpacity(0.95)],
           )
         : LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppColors.surface.withOpacity(0.9),
-              AppColors.surfaceElevated.withOpacity(0.8),
-            ],
+            colors: [AppColors.surface.withOpacity(0.9),
+AppColors.surface.withOpacity(0.9)],
           );
     final Color borderBase = isDark ? AppColors.neutral40 : AppColors.border;
     return AnimatedBuilder(
@@ -329,18 +323,14 @@ class _PremiumProductCardState extends State<PremiumProductCard>
         ? LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppColors.backgroundLight,
-              AppColors.backgroundElevated,
-            ],
+            colors: [AppColors.backgroundLight,
+AppColors.backgroundLight],
           )
         : LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppColors.surfaceContainer,
-              AppColors.surfaceElevated,
-            ],
+            colors: [AppColors.surfaceContainer,
+AppColors.surfaceContainer],
           );
     final Color emptyIconColor =
         isDark ? AppColors.neutral80 : AppColors.textTertiary;

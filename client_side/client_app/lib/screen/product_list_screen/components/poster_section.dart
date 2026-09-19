@@ -70,10 +70,10 @@ class _PosterSectionState extends State<PosterSection>
   List<Color> _getPosterGradient(int index) {
     // Example gradients, replace with your own logic if needed
     final gradients = [
-      [Colors.blue.shade400, Colors.blue.shade900],
-      [Colors.purple.shade400, Colors.purple.shade900],
-      [Colors.orange.shade400, Colors.orange.shade900],
-      [Colors.green.shade400, Colors.green.shade900],
+      [const Color(0xFF0F766E), const Color(0xFF0F766E)],
+      [const Color(0xFF115E59), const Color(0xFF115E59)],
+      [const Color(0xFF13867C), const Color(0xFF13867C)],
+      [const Color(0xFF0B5D57), const Color(0xFF0B5D57)],
     ];
     return gradients[index % gradients.length];
   }

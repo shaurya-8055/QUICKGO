@@ -109,12 +109,10 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFf093fb),
-              Color(0xFFf5576c),
-              Color(0xFF4facfe),
-              Color(0xFF00f2fe),
-            ],
+            colors: [Color(0xFFf093fb),
+Color(0xFFf093fb),
+Color(0xFFf093fb),
+Color(0xFFf093fb)],
             stops: [0.0, 0.3, 0.7, 1.0],
           ),
         ),

@@ -30,10 +30,9 @@ class ProductListScreen extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFF8F9FA), // Light gray-white
-              Color(0xFFFFFFFF), // Pure white
-            ],
+            colors: [Color(0xFFF8F9FA),
+Color(0xFFF8F9FA),
+Color(0xFFF8F9FA)],
             stops: [0.0, 0.3],
           ),
         ),
@@ -98,7 +97,8 @@ class ProductListScreen extends StatelessWidget {
                           height: 24,
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
-                              colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                              colors: [Color(0xFF667eea),
+Color(0xFF667eea)],
                             ),
                             borderRadius: BorderRadius.circular(2),
                           ),
@@ -154,7 +154,8 @@ class ProductListScreen extends StatelessWidget {
                                 horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
-                                colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                                colors: [Color(0xFF667eea),
+Color(0xFF667eea)],
                               ),
                               borderRadius: BorderRadius.circular(20),
                               boxShadow: [
@@ -210,7 +211,8 @@ class ProductListScreen extends StatelessWidget {
                           height: 24,
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
-                              colors: [Color(0xFF11998e), Color(0xFF38ef7d)],
+                              colors: [Color(0xFF11998e),
+Color(0xFF11998e)],
                             ),
                             borderRadius: BorderRadius.circular(2),
                           ),
@@ -234,7 +236,8 @@ class ProductListScreen extends StatelessWidget {
                               horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
-                              colors: [Color(0xFF11998e), Color(0xFF38ef7d)],
+                              colors: [Color(0xFF11998e),
+Color(0xFF11998e)],
                             ),
                             borderRadius: BorderRadius.circular(20),
                           ),

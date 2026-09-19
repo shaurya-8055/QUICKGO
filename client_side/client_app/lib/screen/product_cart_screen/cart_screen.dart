@@ -64,10 +64,8 @@ class CartScreen extends StatelessWidget {
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [
-                          AppColor.purpleGradientStart,
-                          AppColor.purpleGradientEnd,
-                        ],
+                        colors: [AppColor.purpleGradientStart,
+AppColor.purpleGradientStart],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),

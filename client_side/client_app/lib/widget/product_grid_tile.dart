@@ -175,10 +175,8 @@ class ProductGridTile extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppColors.surfaceContainer,
-              AppColors.surfaceElevated,
-            ],
+            colors: [AppColors.surfaceContainer,
+AppColors.surfaceContainer],
           ),
           borderRadius: AppRadius.xlRadius,
           boxShadow: AppShadows.small,

@@ -278,7 +278,8 @@ class BadgeIcon extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFFff6b6b), Color(0xFFee5a52)],
+                colors: [Color(0xFFff6b6b),
+Color(0xFFff6b6b)],
               ),
               borderRadius: const BorderRadius.all(Radius.circular(8)),
               boxShadow: [
@@ -360,7 +361,8 @@ class _NavItem extends StatelessWidget {
               width: selected ? 12 : 0,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                  colors: [Color(0xFF667eea),
+Color(0xFF667eea)],
                 ),
                 borderRadius: BorderRadius.circular(999),
               ),
@@ -456,7 +458,8 @@ class _QuickActionFabState extends State<QuickActionFab>
                 gradient: const LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                  colors: [Color(0xFF667eea),
+Color(0xFF667eea)],
                 ),
                 boxShadow: [
                   BoxShadow(

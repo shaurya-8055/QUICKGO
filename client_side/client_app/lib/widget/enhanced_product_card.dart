@@ -359,10 +359,8 @@ class _EnhancedProductCardState extends State<EnhancedProductCard>
                                                   return Container(
                                                     decoration: BoxDecoration(
                                                       gradient: LinearGradient(
-                                                        colors: [
-                                                          Colors.grey.shade200,
-                                                          Colors.grey.shade100,
-                                                        ],
+                                                        colors: [Colors.grey.shade200,
+Colors.grey.shade200],
                                                       ),
                                                     ),
                                                     child: Icon(
@@ -378,10 +376,8 @@ class _EnhancedProductCardState extends State<EnhancedProductCard>
                                             : Container(
                                                 decoration: BoxDecoration(
                                                   gradient: LinearGradient(
-                                                    colors: [
-                                                      Colors.grey.shade200,
-                                                      Colors.grey.shade100,
-                                                    ],
+                                                    colors: [Colors.grey.shade200,
+Colors.grey.shade200],
                                                   ),
                                                 ),
                                                 child: Icon(
