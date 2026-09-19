@@ -124,8 +124,28 @@
         .device-frame.desktop::before { content: ''; position: absolute; top: 8px; left: 12px; width: 50px; height: 8px; background: #ddd; border-radius: 4px; box-shadow: 60px 0 0 #ddd, 120px 0 0 #ddd; }
 
         /* --- SCREEN --- */
-        .device-screen { width: 100%; height: 100%; overflow: hidden; background: #fff; position: relative; }
-        .device-frame.iphone .device-screen { border-radius: 44px; }
+        .device-screen { width: 100%; height: 100%; overflow: hidden; background: #fff; position: relative; box-sizing: border-box; }
+
+        /* iPhone safe areas. A real iOS device reports insets and the app pads
+           itself; inside an iframe the app cannot know, so the Dynamic Island
+           would sit on top of the app bar. Reserve the space in the frame. */
+        .device-frame.iphone .device-screen {
+            border-radius: 44px;
+            background: #000;
+            padding-top: 54px;   /* status bar + Dynamic Island */
+            padding-bottom: 20px; /* home indicator */
+        }
+        .device-frame.iphone .app-iframe { height: calc(100% - 74px); }
+        .device-frame.iphone .device-screen::after {
+            content: '';
+            position: absolute;
+            bottom: 7px; left: 50%; transform: translateX(-50%);
+            width: 138px; height: 5px;
+            background: rgba(255,255,255,.85);
+            border-radius: 3px;
+            z-index: 26;
+            pointer-events: none;
+        }
         .device-frame.samsung .device-screen { border-radius: 22px; }
         .device-frame.ipad .device-screen { border-radius: 12px; }
         .app-iframe { width: 100%; height: 100%; border: none; display: block; background: white; }

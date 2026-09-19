@@ -140,7 +140,7 @@ class _FloatingQuickActionsState extends State<FloatingQuickActions>
       _QuickAction(
         icon: Icons.support_agent,
         label: 'Help',
-        color: const Color(0xFF8B5CF6),
+        color: const Color(0xFF13867C),
         onTap: () {
           _toggleMenu();
           // Open help/support
