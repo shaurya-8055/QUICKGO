@@ -6,6 +6,8 @@ A full‑stack e‑commerce system with:
 - Flutter admin app (catalog/content management)
 - Node.js/Express + MongoDB backend (REST API, uploads, search helpers)
 
+Live web demo: https://shaurya-8055.github.io/QUICKGO/ (phone-frame view: https://shaurya-8055.github.io/QUICKGO/emulator.html)
+
 This README helps a new contributor set up, run, and extend the project on Windows.
 
 ## Repository Structure
@@ -221,4 +223,4 @@ Use Cases
 
 ## License
 
-Internal project. Add a license file if you intend to distribute.
+MIT. See [LICENSE](LICENSE).

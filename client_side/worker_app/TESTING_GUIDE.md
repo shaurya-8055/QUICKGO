@@ -85,7 +85,8 @@ POST /api/auth/worker/login 200
 **Option A: Using MongoDB Compass** (GUI Tool)
 
 1. Download: https://www.mongodb.com/try/download/compass
-2. Connect with: `mongodb+srv://***REMOVED***@shop.jiobekx.mongodb.net/`
+2. Connect with: `mongodb+srv://<user>:<password>@<cluster>.mongodb.net/`
+   (use the same connection string as the server's `MONGO_URL` environment variable; never commit real credentials)
 3. Navigate to: `worker_app` database → `workers` collection
 4. You should see your worker document with:
    - name, phone, email

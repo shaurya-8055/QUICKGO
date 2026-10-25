@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickGo · Device Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{
+  --teal:#0F766E; --teal-lt:#13867C; --teal-dk:#0B5D57;
+  --stage:#0A0F0E; --panel:#0E1413; --line:rgba(255,255,255,.08);
+  --txt:#E8EDEC; --muted:#8A9795;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--stage);height:100vh;width:100vw;overflow:hidden;color:var(--txt)}
+.container{display:flex;height:100vh;width:100%;overflow:hidden}
+
+/* ---------- SIDEBAR ---------- */
+.control-panel{
+  background:var(--panel);width:320px;height:100vh;padding:28px 24px;
+  border-right:1px solid var(--line);overflow-y:auto;flex-shrink:0;z-index:20;
+  scrollbar-width:thin;scrollbar-color:#2a3331 var(--panel);
+}
+.app-logo{
+  width:46px;height:46px;background:var(--teal);border-radius:13px;
+  display:flex;align-items:center;justify-content:center;margin-bottom:14px;
+  color:#fff;font-size:19px;font-weight:700;letter-spacing:-.5px;
+  box-shadow:0 8px 24px -8px var(--teal);
+}
+.app-title{font-size:19px;font-weight:600;letter-spacing:-.2px}
+.app-sub{color:var(--muted);font-size:13px;margin-top:2px}
+.section-title{color:var(--muted);margin:28px 0 12px;font-size:11px;text-transform:uppercase;letter-spacing:1.4px;font-weight:600}
+.device-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.device-btn{
+  background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:10px;
+  padding:11px 12px;cursor:pointer;color:#B9C4C2;display:flex;align-items:center;gap:9px;
+  font:500 13px/1 'Inter',sans-serif;transition:.18s;
+}
+.device-btn:hover{background:rgba(255,255,255,.08);color:#fff}
+.device-btn.active{background:var(--teal);border-color:var(--teal);color:#fff}
+.feature-list{list-style:none;color:#A8B4B2;font-size:13px;line-height:2.05}
+.feature-list i{color:var(--teal-lt);margin-right:9px;font-size:12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:11px;color:#9FB0AD;border:1px solid var(--line);background:rgba(255,255,255,.03);padding:5px 9px;border-radius:999px}
+.panel-foot{margin-top:28px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.panel-foot a{color:var(--teal-lt);text-decoration:none}
+.panel-foot a:hover{text-decoration:underline}
+
+/* ---------- STAGE ---------- */
+.device-emulator{
+  flex:1;height:100vh;position:relative;overflow:hidden;
+  display:flex;justify-content:center;align-items:center;
+  background:
+    radial-gradient(60% 55% at 50% 45%, rgba(15,118,110,.18) 0%, rgba(15,118,110,0) 70%),
+    #090D0C;
+}
+.device-emulator::before{ /* subtle grid */
+  content:'';position:absolute;inset:0;pointer-events:none;opacity:.35;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:48px 48px;
+  -webkit-mask-image:radial-gradient(70% 60% at 50% 50%,#000 0%,transparent 75%);
+          mask-image:radial-gradient(70% 60% at 50% 50%,#000 0%,transparent 75%);
+}
+.device-wrapper{position:relative;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:22px;transition:transform .1s linear;transform-origin:center center;padding:20px}
+
+/* ---------- IPHONE 15 PRO ---------- */
+.device-frame.iphone{
+  width:393px;height:852px;border-radius:54px;background:#2b2b2b;padding:10px;
+  box-shadow:inset 0 0 0 2px #58585a, inset 0 0 0 6px #000, 0 0 0 3px #454545,
+             0 40px 90px rgba(0,0,0,.65), 0 0 120px -40px var(--teal);
+  position:relative;z-index:10;flex-shrink:0;
+}
+.device-frame.iphone::before{ /* Dynamic Island */
+  content:'';position:absolute;top:22px;left:50%;transform:translateX(-50%);
+  width:122px;height:36px;background:#000;border-radius:20px;z-index:30;pointer-events:none;
+}
+.btn-physical{position:absolute;background:#383838;border-radius:2px 0 0 2px;width:4px;box-shadow:inset -1px 0 1px rgba(255,255,255,.1);z-index:5}
+.btn-action{top:110px;left:-4px;height:26px}
+.btn-vol-up{top:155px;left:-4px;height:45px}
+.btn-vol-down{top:215px;left:-4px;height:45px}
+.btn-power{top:160px;right:-4px;height:80px;border-radius:0 2px 2px 0}
+
+/* ---------- OTHER DEVICES ---------- */
+.device-frame.samsung{width:384px;height:832px;border-radius:32px;background:#0d0d0d;padding:4px;box-shadow:0 0 0 2px #4a4a4a,0 40px 90px rgba(0,0,0,.6),0 0 120px -40px var(--teal);position:relative;flex-shrink:0}
+.device-frame.samsung::before{content:'';position:absolute;top:14px;left:50%;transform:translateX(-50%);width:11px;height:11px;background:#000;box-shadow:inset 0 0 0 1px #2a2a2a;border-radius:50%;z-index:30}
+.device-frame.ipad{width:820px;height:1100px;border-radius:26px;background:#2d2d2d;padding:12px;box-shadow:0 40px 90px rgba(0,0,0,.6);position:relative;flex-shrink:0}
+.device-frame.desktop{width:1280px;height:800px;border-radius:12px;background:#2d2d2d;padding:26px 4px 4px;box-shadow:0 40px 90px rgba(0,0,0,.6);position:relative;flex-shrink:0}
+.device-frame.desktop::before{content:'';position:absolute;top:9px;left:14px;width:9px;height:9px;background:#ff5f57;border-radius:50%;box-shadow:16px 0 0 #febc2e,32px 0 0 #28c840}
+
+/* ---------- SCREEN ---------- */
+.device-screen{width:100%;height:100%;overflow:hidden;background:#fff;position:relative;box-sizing:border-box}
+.app-iframe{width:100%;height:100%;border:none;display:block;background:#fff}
+
+/* System bars: the app runs in an iframe and cannot read the real safe-area
+   insets, so the frame paints the status bar and home indicator itself. */
+.sys-top,.sys-bottom{position:absolute;left:0;right:0;z-index:25;pointer-events:none;display:none}
+.sys-top{
+  top:0;height:54px;background:var(--teal);color:#fff;
+  display:none;align-items:flex-end;justify-content:space-between;
+  padding:0 30px 9px;font-size:15px;font-weight:600;letter-spacing:.2px;
+}
+.sys-top .sys-icons{display:flex;align-items:center;gap:7px;font-size:13px}
+.sys-top .batt{font-size:15px}
+.sys-bottom{bottom:0;height:22px;background:#fff}
+.sys-bottom::after{content:'';position:absolute;bottom:7px;left:50%;transform:translateX(-50%);width:138px;height:5px;background:#0d0d0d;border-radius:3px;opacity:.85}
+
+.device-frame.iphone .device-screen{border-radius:44px;padding-top:54px;padding-bottom:22px}
+.device-frame.iphone .sys-top,
+.device-frame.iphone .sys-bottom{display:flex}
+
+.device-frame.samsung .device-screen{border-radius:28px;padding-top:34px;padding-bottom:18px}
+.device-frame.samsung .sys-top,
+.device-frame.samsung .sys-bottom{display:flex}
+.device-frame.samsung .sys-top{height:34px;padding:0 18px 6px;font-size:13px}
+.device-frame.samsung .sys-bottom{height:18px}
+.device-frame.samsung .sys-bottom::after{width:110px;height:4px;bottom:6px}
+
+.device-frame.ipad .device-screen{border-radius:14px}
+.device-frame.desktop .device-screen{border-radius:0 0 8px 8px}
+
+/* ---------- TOOLBAR ---------- */
+.device-tools{
+  display:flex;flex-direction:column;gap:14px;padding:14px 9px;
+  background:rgba(255,255,255,.05);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-radius:30px;border:1px solid var(--line);box-shadow:0 20px 40px -20px #000;
+  z-index:50;flex-shrink:0;
+}
+.tool-btn{
+  width:42px;height:42px;border-radius:50%;border:1px solid var(--line);
+  background:rgba(255,255,255,.04);color:#C6D1CF;font-size:16px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:.18s;
+}
+.tool-btn:hover{background:var(--teal);border-color:var(--teal);color:#fff;transform:scale(1.07)}
+.tool-btn:active{transform:scale(.95)}
+
+/* ---------- UTILS ---------- */
+.loading-screen{position:absolute;inset:0;background:#0B1211;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:12px;color:#9FB0AD;font-size:13px;z-index:40;transition:opacity .5s}
+.loading-screen.hidden{opacity:0;pointer-events:none}
+.spinner{width:28px;height:28px;border:3px solid rgba(255,255,255,.12);border-top-color:var(--teal-lt);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.flash-overlay{position:absolute;inset:0;background:#fff;z-index:100;opacity:0;pointer-events:none}
+.flash-anim{animation:flash .3s ease-out}
+@keyframes flash{0%{opacity:.8}100%{opacity:0}}
+
+@media (max-width:900px){
+  .control-panel{display:none!important}
+  .container{width:100vw;height:100vh}
+  .device-emulator{width:100vw;height:100vh;padding:0}
+  .device-wrapper{gap:14px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <aside class="control-panel">
+    <div class="app-logo">Q</div>
+    <div class="app-title">QuickGo</div>
+    <div class="app-sub">E-commerce &amp; on-demand services</div>
+
+    <div class="section-title">Device</div>
+    <div class="device-grid">
+      <button class="device-btn active" data-device="iphone"><i class="fab fa-apple"></i> iPhone 15 Pro</button>
+      <button class="device-btn" data-device="samsung"><i class="fab fa-android"></i> S23 Ultra</button>
+      <button class="device-btn" data-device="ipad"><i class="fas fa-tablet-alt"></i> iPad Air</button>
+      <button class="device-btn" data-device="desktop"><i class="fas fa-desktop"></i> Desktop</button>
+    </div>
+
+    <div class="section-title">What's live</div>
+    <ul class="feature-list">
+      <li><i class="fas fa-check"></i> Product catalog &amp; search</li>
+      <li><i class="fas fa-check"></i> Cart and checkout</li>
+      <li><i class="fas fa-check"></i> Service requests</li>
+      <li><i class="fas fa-check"></i> Order tracking</li>
+      <li><i class="fas fa-check"></i> User dashboard</li>
+      <li><i class="fas fa-check"></i> Technician management</li>
+    </ul>
+
+    <div class="section-title">Built with</div>
+    <div class="chips">
+      <span class="chip">Flutter</span><span class="chip">Node.js</span><span class="chip">MongoDB</span>
+      <span class="chip">JWT</span><span class="chip">Stripe</span><span class="chip">OneSignal</span>
+    </div>
+
+    <div class="panel-foot">
+      Demo build running against the live API.<br>
+      <a href="https://github.com/shaurya-8055/QUICKGO" target="_blank" rel="noopener">Source on GitHub</a>
+    </div>
+  </aside>
+
+  <main class="device-emulator">
+    <div class="device-wrapper" id="deviceWrapper">
+      <div class="device-frame iphone" id="deviceFrame">
+        <div class="btn-physical btn-action"></div>
+        <div class="btn-physical btn-vol-up"></div>
+        <div class="btn-physical btn-vol-down"></div>
+        <div class="btn-physical btn-power"></div>
+
+        <div class="device-screen">
+          <div class="sys-top">
+            <span id="sysClock">9:41</span>
+            <span class="sys-icons">
+              <i class="fas fa-signal"></i><i class="fas fa-wifi"></i><i class="fas fa-battery-full batt"></i>
+            </span>
+          </div>
+          <div class="sys-bottom"></div>
+          <div class="flash-overlay" id="flash"></div>
+          <div class="loading-screen" id="loadingScreen">
+            <div class="spinner"></div><div>Loading QuickGo…</div>
+          </div>
+          <iframe id="appIframe" class="app-iframe" src="https://shaurya-8055.github.io/QUICKGO/" onload="hideLoader()" title="QuickGo app"></iframe>
+        </div>
+      </div>
+
+      <div class="device-tools">
+        <button class="tool-btn" onclick="goBack()" title="Back"><i class="fas fa-arrow-left"></i></button>
+        <button class="tool-btn" onclick="goHome()" title="Home"><i class="fas fa-home"></i></button>
+        <button class="tool-btn" onclick="refreshApp()" title="Reload"><i class="fas fa-redo-alt"></i></button>
+        <button class="tool-btn" onclick="takeScreenshot()" title="Screenshot"><i class="fas fa-camera"></i></button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const devices = ['iphone','samsung','ipad','desktop'];
+const iframe = document.getElementById('appIframe');
+const homeUrl = "https://shaurya-8055.github.io/QUICKGO/";
+
+document.querySelectorAll('.device-btn').forEach(btn => {
+  btn.addEventListener('click', function () {
+    document.querySelectorAll('.device-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    const frame = document.getElementById('deviceFrame');
+    devices.forEach(c => frame.classList.remove(c));
+    frame.classList.add(this.dataset.device);
+    const show = this.dataset.device === 'iphone' ? 'block' : 'none';
+    document.querySelectorAll('.btn-physical').forEach(b => b.style.display = show);
+    setTimeout(adjustFrameSize, 50);
+  });
+});
+
+function goHome(){ showLoader(); iframe.src = homeUrl; }
+function refreshApp(){ showLoader(); iframe.src = iframe.src; }
+function goBack(){ try { iframe.contentWindow.history.back(); } catch(e){ refreshApp(); } }
+function takeScreenshot(){
+  const flash = document.getElementById('flash');
+  flash.classList.add('flash-anim');
+  setTimeout(() => flash.classList.remove('flash-anim'), 300);
+}
+function showLoader(){ document.getElementById('loadingScreen').classList.remove('hidden'); }
+function hideLoader(){ setTimeout(() => document.getElementById('loadingScreen').classList.add('hidden'), 800); }
+
+function tickClock(){
+  const d = new Date();
+  let h = d.getHours() % 12; if (h === 0) h = 12;
+  document.getElementById('sysClock').textContent = h + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+
+function adjustFrameSize(){
+  const wrapper = document.getElementById('deviceWrapper');
+  const container = document.querySelector('.device-emulator');
+  wrapper.style.transform = 'none';
+  const padding = window.innerWidth < 900 ? 20 : 60;
+  const scale = Math.min(
+    (container.clientWidth  - padding) / wrapper.offsetWidth,
+    (container.clientHeight - padding) / wrapper.offsetHeight,
+    1
+  );
+  wrapper.style.transform = `scale(${scale})`;
+}
+
+window.addEventListener('load', () => { tickClock(); adjustFrameSize(); hideLoader(); });
+setInterval(tickClock, 30000);
+let resizeTimer;
+window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(adjustFrameSize, 50); });
+</script>
+</body>
+</html>
