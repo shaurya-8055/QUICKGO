@@ -1,20 +1,45 @@
-# Complete E‑Commerce App — Monorepo Guide
+<h1 align="center">QuickGo</h1>
 
-A full‑stack e‑commerce system with:
+<p align="center">
+  A full-stack e-commerce system — a Flutter customer storefront and worker/admin apps on a Node.js/Express + MongoDB REST API.
+</p>
 
-- Flutter client app (customers)
-- Flutter admin app (catalog/content management)
-- Node.js/Express + MongoDB backend (REST API, uploads, search helpers)
+<p align="center">
+  <a href="https://github.com/shaurya-8055/QUICKGO/actions/workflows/ci.yml"><img src="https://github.com/shaurya-8055/QUICKGO/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://shaurya-8055.github.io/QUICKGO/"><img src="https://img.shields.io/badge/demo-live-brightgreen" alt="Live demo"></a>
+  <img src="https://img.shields.io/badge/Flutter-02569B?logo=flutter&logoColor=white" alt="Flutter">
+  <img src="https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white" alt="Node.js">
+  <img src="https://img.shields.io/badge/MongoDB-47A248?logo=mongodb&logoColor=white" alt="MongoDB">
+</p>
 
-Live web demo: https://shaurya-8055.github.io/QUICKGO/ (phone-frame view: https://shaurya-8055.github.io/QUICKGO/emulator.html)
+<p align="center">
+  <b>Live web demo:</b> <a href="https://shaurya-8055.github.io/QUICKGO/">shaurya-8055.github.io/QUICKGO</a>
+  · <a href="https://shaurya-8055.github.io/QUICKGO/emulator.html">phone-frame view</a>
+</p>
 
-This README helps a new contributor set up, run, and extend the project on Windows.
+---
 
-## Repository Structure
+## What's inside
+
+| Component | Path | What it does |
+|---|---|---|
+| **Customer storefront** | `client_side/client_app` | Poster carousel, category chips, responsive product grid, product details, cart, search & filters, profile and notifications |
+| **Worker app** | `client_side/worker_app` | Service-provider ("WorkerPro") app |
+| **Admin console** | `client_side/admin_app_complt_app` | Manage categories, brands, products, variants, posters, orders and coupons |
+| **REST API** | `server_side/online_store_api` | Express + Mongoose API: products, categories, posters, orders, users and file uploads |
+
+## Tech stack
+
+- **Apps** — Flutter 3.x / Dart 3.x, Provider for state
+- **API** — Node.js + Express, MongoDB via Mongoose
+- **Uploads** — Multer; static images served from `public/`
+
+## Repository structure
 
 ```
 client_side/
   client_app/              # Flutter customer app (primary app)
+  worker_app/              # Flutter service-provider app
   admin_app_complt_app/    # Flutter admin console
 server_side/
   online_store_api/        # Node/Express API + MongoDB models
@@ -22,204 +47,110 @@ server_side/
 photos/                    # Sample images used in demos
 ```
 
-## Tech Stack
-
-- Flutter 3.x, Dart 3.x, Provider for state management
-- Node.js 18+ (Express), MongoDB (Mongoose)
-- File uploads via multer; static assets served from `public/`
-
 ---
 
-## Quick Start (recommended order)
+## Quick start
 
-1. Start the Backend API (Node + MongoDB)
+Run in this order: API → customer app → (optional) worker/admin apps.
 
-- Location: `server_side/online_store_api`
-- Create `.env` (see the example below) and install dependencies.
-- Start the server; confirm it serves JSON at `/api` routes and static images under `/public`.
+### 1. Backend API
 
-2. Run the Flutter Client App
-
-- Location: `client_side/client_app`
-- Ensure the base API URL points to your server (emulator uses `10.0.2.2`).
-- Launch on an Android emulator or a device.
-
-3. Optional: Run the Admin App
-
-- Location: `client_side/admin_app_complt_app`
-- Same Flutter steps; log in and perform CRUD on categories/products/posters.
-
----
-
-## Backend API — Setup and Run
-
-Folder: `server_side/online_store_api`
-
-1. Install
-
-```powershell
+```bash
 cd server_side/online_store_api
 npm install
 ```
 
-2. Environment
-   Create a `.env` file in `online_store_api` with contents like:
+Create `.env` in `server_side/online_store_api`:
 
-```
+```env
 PORT=3000
 MONGO_URI=mongodb://localhost:27017/online_store
-# Set this so the API emits absolute image URLs your app can load
+# Absolute image URLs the apps can load
 PUBLIC_BASE_URL=http://localhost:3000
-# Optional: If you serve from a LAN IP, set this to http://<your-ip>:3000
-# PUBLIC_BASE_URL=http://192.168.1.50:3000
+# On a LAN, use e.g. http://192.168.1.50:3000
 ```
 
-3. Run
-
-```powershell
+```bash
 npm run dev
 ```
 
-- The API exposes REST endpoints under routes like `/api/products`, `/api/categories`, etc.
+- REST routes live under `/api/products`, `/api/categories`, etc.
 - Static images are served from `/public/products`, `/public/category`, `/public/posters`.
-- Upload flows save files there and return absolute URLs based on `PUBLIC_BASE_URL` (or request host).
+- Uploads save there and return absolute URLs based on `PUBLIC_BASE_URL`.
+- A `docker-compose.yml` is available if you prefer containerised MongoDB.
+- Android emulators reach the host at `http://10.0.2.2:3000`.
 
-Notes
+### 2. Customer app
 
-- You can use Docker (`docker-compose.yml`) if you prefer containerized MongoDB.
-- If you access from Android emulator, your Flutter app should use `http://10.0.2.2:3000` as a base.
-
----
-
-## Client App (Customer) — Setup and Run
-
-Folder: `client_side/client_app`
-
-1. Install Flutter deps
-
-```powershell
+```bash
 cd client_side/client_app
 flutter pub get
-```
-
-2. Configure API base URL
-
-- The app resolves base URL per platform (Android emulator uses `10.0.2.2`).
-- Ensure the server is reachable from the device/emulator.
-
-3. Run on Android emulator/device
-
-```powershell
 flutter run
 ```
 
-4. Build a release APK
+- The app resolves the API base URL per platform (Android emulator → `10.0.2.2`).
+- Release build: `flutter build apk --release` → `client_side/client_app/build/app/outputs/flutter-apk/app-release.apk`.
 
-```powershell
-flutter build apk --release
-```
+**Customer features**
 
-- Output: `client_side/client_app/build/app/outputs/flutter-apk/app-release.apk`
-
-Key Features
-
-- Home: Poster carousel, category chips, Featured Products grid
+- Home: poster carousel, category chips, featured-product grid
 - Product details: gallery, variant selection, add to cart
-- Cart: quantity updates, order flow scaffold
-- Search & filters: advanced search screen with category/brand filtering
-- Profile, Services, Notifications screens
+- Cart: quantity updates and order-flow scaffold
+- Search & filters: category/brand filtering
+- Profile, services and notifications screens
+- Responsive product grid (2 columns on phones, 3–8+ on tablets/laptops)
 
-Responsive Grid
+### 3. Worker and admin apps (optional)
 
-- The product grid is responsive by default and increases columns as the screen widens.
-- Phone: typically 2 columns; tablets/laptops: 3–8+ columns.
-
-Bottom Bar UX
-
-- On Home, after you scroll past the “Featured Products” header:
-  - Scroll down → bottom bar hides
-  - Scroll up → bottom bar shows
-- When hidden, it frees layout space so products shift up.
-
-Troubleshooting
-
-- Images not loading on Android emulator:
-  - Use `10.0.2.2` as the host for the API, and ensure the server returns absolute URLs.
-  - If serving over HTTP in dev, ensure Android network security allows cleartext or serve over HTTPS.
-- Release build shrinker issues:
-  - If R8 stripping breaks 3rd‑party SDKs, add keep rules or disable minify until rules are set.
-
----
-
-## Admin App — Setup and Run (optional)
-
-Folder: `client_side/admin_app_complt_app`
-
-Steps
-
-```powershell
-cd client_side/admin_app_complt_app
+```bash
+cd client_side/worker_app            # or admin_app_complt_app
 flutter pub get
 flutter run
 ```
 
-Use Cases
-
-- Manage categories, brands, products, variants, posters
-- Review orders and coupons (where implemented)
-
 ---
 
-## Project Anatomy (Flutter Client)
+## Project anatomy
 
-- `lib/main.dart` — app bootstrap, theme, providers
-- `lib/services/http_services.dart` — REST calls
-- `lib/core/data/data_provider.dart` — central data fetch/state
-- `lib/models/*` — DTOs (product, category, user, order, poster, coupon...)
-- `lib/screen/*` — organized feature screens
-  - `home_screen.dart` — main shell with bottom nav + FAB
-  - `product_list_screen/*` — home tab (poster, categories, product grid)
-  - `product_details_screen/*` — product page + cart add
-  - `product_cart_screen/*` — cart and provider
-  - `product_by_category_screen/*` — filtering by category/brand
-  - `login_screen/*` — auth (flutter_login)
-  - `services/*`, `profile_screen/*`, `notifications_screen/*`
-- `lib/widget/*` — reusable UI
-  - `masonry_product_grid_view.dart` — responsive product grid
-  - `premium_product_card.dart`, `enhanced_product_card*.dart`
-  - `modern_filter_bottom_sheet.dart`, `shimmer_effect.dart`
-- `lib/utility/*` — theming, colors, small helpers
+**Flutter client (`client_side/client_app/lib`)**
 
----
+- `main.dart` — bootstrap, theme, providers
+- `services/http_services.dart` — REST calls
+- `core/data/data_provider.dart` — central data fetch/state
+- `models/*` — DTOs (product, category, user, order, poster, coupon…)
+- `screen/*` — feature screens (home, product list/details, cart, category, login, profile, notifications)
+- `widget/*` — reusable UI (responsive masonry grid, product cards, filter sheet, shimmer)
+- `utility/*` — theming and helpers
 
-## Project Anatomy (Node API)
+**Node API (`server_side/online_store_api`)**
 
-- `index.js` — Express app entry
-- `routes/*` — modular REST endpoints (products, categories, posters, orders, users, etc.)
+- `index.js` — Express entry
+- `routes/*` — modular REST endpoints
 - `model/*` — Mongoose schemas
-- `public/*` — static files storage for uploaded images
-- `uploadFile.js` — multer config for uploads
-- `services/*` & `search/*` — optional search integrations and helpers
+- `public/*` — uploaded/static images
+- `uploadFile.js` — Multer config
+- `services/*`, `search/*` — search integrations and helpers
 
 ---
 
-## Extending the System
+## Continuous integration
 
-- Add payment gateways: implement in `routes/payment.js`, create client calls, and record orders.
-- Add push notifications: integrate FCM in the client and a server route to send messages.
-- Improve search: wire Meilisearch or vector search via `services/` and `search/` modules.
-- Analytics: add event logging on client actions (view, add-to-cart, purchase) and dashboards in admin app.
+`.github/workflows/ci.yml` runs on every push and pull request:
 
----
+- resolves dependencies for all three Flutter apps, analyzes and web-builds the customer app
+- installs the API dependencies and syntax-checks the Express entry point
 
-## Conventions & Tips
+## Troubleshooting
 
-- Use Provider for state; keep network calls in services/providers.
-- Keep models in `lib/models` matching server responses.
-- For Android emulator, prefer `10.0.2.2` instead of `localhost`.
-- Commit image uploads under `server_side/online_store_api/public/` only for demos; otherwise store externally (S3, GCS).
+- **Images not loading on Android emulator** — use `10.0.2.2` as the API host and make sure it returns absolute URLs. Allow cleartext traffic or serve over HTTPS in dev.
+- **R8/minify breaks a third-party SDK** — add keep rules or disable minify in `build.gradle` until rules are set.
+- **`npm ci` fails** — the committed lockfile is out of sync; use `npm install` (or commit a refreshed lockfile).
 
----
+## Conventions
+
+- Keep state in Provider and network calls in services/providers.
+- Keep models in `lib/models` aligned with API responses.
+- Commit uploaded images under `public/` only for demos; store production media externally (S3, GCS).
 
 ## License
 
